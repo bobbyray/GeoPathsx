@@ -1,4 +1,4 @@
-﻿'use strict';
+'use strict';
 // wigo_ws_Model oject is in js/Model.js.
 
 // Object for View present by page.
@@ -1124,6 +1124,12 @@ function wigo_ws_Controller() {
 window.app = {};
 window.app.OnDocReady = function (e) {
     // Create the controller and therefore the view and model therein.
+    // Redirect if not https. 
+    // Attribution: Thanks to stack overflow, https://stackoverflow.com/questions/4723213/detect-http-or-https-then-force-https-in-javascript
+    if (location.protocol !== 'https:')
+    {
+     location.href = 'https:' + window.location.href.substring(window.location.protocol.length);
+    }    
     window.app.ctlr = new wigo_ws_Controller();
 };
 
