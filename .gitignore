@@ -301,3 +301,9 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+# === Web config
+Web.config
+
+# === Private appSettings.config
+Private/appSettings.config
