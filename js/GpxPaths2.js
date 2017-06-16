@@ -707,8 +707,8 @@ function wigo_ws_View() {
 
     // Set Facebook login.
     // NOTE: appid must be in sync for private\appSettings.config
-    var fb = new wigo_ws_FaceBookAuthentication('694318660701967'); //MainAppId 
-    // var fb = new wigo_ws_FaceBookAuthentication('870220976445067'); //LocalTestingAppId.
+    //var fb = new wigo_ws_FaceBookAuthentication('694318660701967'); //MainAppId 
+    var fb = new wigo_ws_FaceBookAuthentication('870220976445067'); //LocalTestingAppId.
 
     fb.callbackAuthenticated = cbFbAuthenticationCompleted;
 }
@@ -1126,10 +1126,14 @@ window.app.OnDocReady = function (e) {
     // Create the controller and therefore the view and model therein.
     // Redirect if not https. 
     // Attribution: Thanks to stack overflow, https://stackoverflow.com/questions/4723213/detect-http-or-https-then-force-https-in-javascript
+
+    /* ////20170613 Put back, comment out for debug 
     if (location.protocol !== 'https:')
     {
      location.href = 'https:' + window.location.href.substring(window.location.protocol.length);
     }    
+    */
+
     window.app.ctlr = new wigo_ws_Controller();
 };
 
