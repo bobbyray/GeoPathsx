@@ -1,4 +1,10 @@
 ﻿'use strict';
+/* 
+Copyright (c) 2015, 2016 Robert R Schomburg
+Licensed under terms of the MIT License, which is given at
+https://github.com/bobbyray/MitLicense/releases/tag/v1.0
+*/
+
 // Object for the Model (data) used by html page.
 
 // Object for settings for My Geo Trail saved/loaded by model.

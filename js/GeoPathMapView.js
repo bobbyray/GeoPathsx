@@ -1,3 +1,8 @@
+/* 
+Copyright (c) 2015, 2016 Robert R Schomburg
+Licensed under terms of the MIT License, which is given at
+https://github.com/bobbyray/MitLicense/releases/tag/v1.0
+*/
 
 /* Prototype for L.LatLng object in LeafLetJs provided by 
 Gregor the Map Guy Blog

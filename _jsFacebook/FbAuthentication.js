@@ -1,5 +1,9 @@
 ﻿'use strict';
-
+/* 
+Copyright (c) 2015, 2016 Robert R Schomburg
+Licensed under terms of the MIT License, which is given at
+https://github.com/bobbyray/MitLicense/releases/tag/v1.0
+*/
 /* Facebook instructions for setting up the Facebook SDK for Javascript
 Setup the Facebook SDK for JavaScript
 The following snippet of code will give the basic version of the SDK where the options are set to their most common defaults. You should insert it directly after the opening <body> tag on each page you want to load it:
