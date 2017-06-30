@@ -27,5 +27,5 @@ SOFTWARE.
 * Facebook connect for javascript(https://connect.facebook.net/en_US/sdk.js), Facebook, license given in link.
 * [jquery](http://code.jquery.com/jquery-1.10.2.js), MIT License
 * [jquery UI](http://code.jquery.com/ui/1.11.4/jquery-ui.js), MIT License
-* [Open Street Map](http://leaflet-1.0.3/leaflet.js)
+* [Leaflet - Open Maps](https://github.com/bobbyray/GeoPathsx/blob/master/leaflet-1.0.3/leaflet.js), BSD 2-clause "Simplified" License
 
