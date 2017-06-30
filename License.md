@@ -30,4 +30,10 @@ SOFTWARE.
 * [jquery](http://code.jquery.com/jquery-1.10.2.js), MIT License
 * [jquery UI](http://code.jquery.com/ui/1.11.4/jquery-ui.js), MIT License
 * [Leaflet - Open Maps](https://github.com/Leaflet/Leaflet/blob/master/LICENSE), BSD 2-clause "Simplified" License
-
+## Hosting Environment for Web Server Currently Used
+* IIS 7, Microsoft Commercial License
+* Microsoft .Net 4, Microsoft Commericial License
+* MySql v5.5 Database, Community Edition, GNU General Public License 
+## Build Tools for Web Server Code Currently Used
+* Microsoft Visual Studio Express 2013 for Web, free personal license  
+Note: Microsoft Visual Studio Community Edition, open source license, is replacement that should work since Visual Studio Express 2013 for Web is no longer available.
