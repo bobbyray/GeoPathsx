@@ -39,4 +39,4 @@ Such code has its own open source license and is described below.
 * MySql v5.5 Database, Community Edition, GNU General Public License 
 ## Build Tools for Web Server Code Currently Used
 * Microsoft Visual Studio Express 2013 for Web, free personal license  
-Note: Microsoft Visual Studio Community Edition, open source license, is replacement that should work since Visual Studio Express 2013 for Web is no longer available.
+Note: *Microsoft Visual Studio Community Edition*, which has an open source license, is a replacement for *Visual Studio Express 2013 for Web*, which is no longer available.
