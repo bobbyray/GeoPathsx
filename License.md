@@ -25,4 +25,7 @@ SOFTWARE.
 * MySql.Data.dll, v6.4.3.0, Oracle and/or affiliates,  
 ## Open Source Licenses Used by Client Side Code at Run Time
 * Facebook connect for javascript(https://connect.facebook.net/en_US/sdk.js), Facebook, license given in link.
+* //code.jquery.com/jquery-1.10.2.js
+* //code.jquery.com/ui/1.11.4/jquery-ui.js
+* leaflet-1.0.3/leaflet.js, Open Street Map
 
