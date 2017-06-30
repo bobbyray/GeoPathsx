@@ -23,3 +23,6 @@ SOFTWARE.
 ## Open Source License Used by Web Server at Run Time
 * Facebook C# SDK, dll v6.0.18, Outercurve Foundation, Appache-2.0
 * MySql.Data.dll, v6.4.3.0, Oracle and/or affiliates,  
+## Open Source Licenses Used by Client Side Code at Run Time
+* Facebook connect for javascript(https://connect.facebook.net/en_US/sdk.js), Facebook, license given in link.
+
