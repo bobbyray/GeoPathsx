@@ -19,14 +19,15 @@ Some sites may download KML files (Google format). Currently a KML file cannot b
 * [Private/appSettings.Example.config](../master/Private/appSettings.Example.config) needs Facebook app values set and file needs to be renamed appSettings.config.  
 The Facebook app id and secret are set by a developer when logged into one's Facebook account. The developer needs to set up an app in Facebook, using the Facebook Developer Console, that is allowed to use Facebook authentication. The GeoTrail mobile app and the GpxPaths.html use the same Facebook app id for user authentication via Facebook.
 * Domain and URI for Web Server in [js/GeoPathsApi2.js](../master/js/GeoPathsApi2.js).  
-Search for: *base = new wigo_ws_Ajax(*.  
+Search for: *base = new wigo_ws_Ajax(*  
 Set the constructor to specify your_domain in the URI as indicated below:  
 `var base = new wigo_ws_Ajax("https://your_domain/geopathsx/Service.svc/"); // Remote host`  
 The default is:  
 `var base = new wigo_ws_Ajax("https://www.wigo.ws/geopathsx/Service.svc/"); // Remote host`
 * The MySql database needs to be initially created.  
-[MySqlInitialTables/MySqlInitialTable.sql](../master/MySqlInitialTables/MySqlInitialTable.sql) is a file that can be imported into MySql that defines the database and two tables, which are empty.  
+[MySqlInitialTables/MySqlInitialTable.sql](../master/MySqlInitialTables/MySqlInitialTable.sql) is a file that can be imported into MySql to initialize the database with two tables, which are empty.  
 **Change the database name of some_geopath in the file to match the database name used at the hosting site.**
+Change the name in two places: the CREATE DATABASE and the USE statments.
 However, do **not** change the table name of geopath in the file.
 ## Deployment to Remote Host
 Deploy the directory structure of this repository to a remote host for which IIS is configured to have a virtual directory named geopathsx corresponding to root of this repository structure.
@@ -82,8 +83,7 @@ Notes for installing, which obviously may be outdated for a different installer 
   Next installer goes through Accounts and Roles
     Root Account Password: *******
       NOTE: password must match that used in the database connection string 
-            in passkeeper/web.config on the IIS server and the database password 
-            set in the C# HtmlPassKeeperMySqlBackup app.
+            in the web.config on the IIS server.
     MySql User Accounts: did not add any.
   
   Next installer goes through Window Services
@@ -123,11 +123,12 @@ Notes for installing, which obviously may be outdated for a different installer 
   
   Installer ends and Workbench opens.
   </pre>  
-* Initialize MsSql Database and Table  
+* Initialize MySql Database  
 In MySql Workbench prepare the database schema:</p>
   * **NOTE: Do not import database if it already exists because it will be over-written with empty tables.**  
-  * If geopath database does not exist, import it from [MySqlInitialTables/MySqlInitialTable.sql](../master/MySqlInitialTables/MySqlInitialTable.sql).  
+  * If database does not exist, import it from [MySqlInitialTables/MySqlInitialTable.sql](../master/MySqlInitialTables/MySqlInitialTable.sql).  
   Customize the MySqlInitialTable.sql file to use the database name you want instead of some_geopath.  
+  Change the name in two places: the CREATE DATABASE and USE statements.  
   Note: Do **not** change the table name of geopath in the file.
   * The database name and password must be set in the local web.config file to match.  
 ### Local Debugging, Temporary Changes
