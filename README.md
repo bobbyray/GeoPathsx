@@ -121,11 +121,10 @@ Notes for installing, which obviously may be outdated for a different installer 
   </pre>  
 * Initialize MsSql Database and Table  
 In MySql Workbench prepare the database schema:</p>
-  * Add a database schema named: geopath  
-  * Import the database from **repository path goes here**
-  
-
-
+  * **NOTE: database geopath will be over-written and will be empty if it exists.    
+  Do not import geopath if it already exists.** 
+  * If geopath database does not exist, import it from **repository path goes here**  
+  * The database name, geopath, and password must be set in the local web.config file to match.  
 ### Local Debugging, Temporary Changes
 * Set URI for web server in [js/GeoPathsApi2.js](../master/js/GeoPathsApi2.js).  
 Search for "base = new wigo_ws_Ajax(". Set the constructor arg to the URI for the web server's Service.svc file.  
