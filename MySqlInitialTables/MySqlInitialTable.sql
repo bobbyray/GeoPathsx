@@ -15,10 +15,10 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 --
--- Current Database: `geopath`
+-- Current Database: `some_geopath`
 --
 
-CREATE DATABASE /*!32312 IF NOT EXISTS*/ `geopath` /*!40100 DEFAULT CHARACTER SET latin1 */;
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `some_geopath` /*!40100 DEFAULT CHARACTER SET latin1 */;
 
 USE `geopath`;
 
