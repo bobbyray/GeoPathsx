@@ -34,7 +34,7 @@ Deploy the directory structure of this repository to a remote host for which IIS
 ## Local Debugging
 Since it likely not possible to debug at the remote server, one can debug on a local machine. Currently I am using Microsoft Visuals Studio 2013 Express for Web to debug. However, Visual Studio 2013 Express for Web is no longer available and is replaced by Visual Studio Community Edition.
 ### Local Debugging, Preliminaries To Do Once
-* Install Microsoft Visual Studio Community Edition  
+* Install Microsoft Visual Studio Community Edition if Needed  
 If not using Visual Studio 2013 Express for Web, you can install the [Microsoft Visual Studio Community Edition](https://www.visualstudio.com/vs/community/), which is the replacement for Visual Studio Express 203 for Web.
 Since the following description was written for using Visual Studio 2013 Express for Web, it could be outdated for later versions.  
 The Visual Studio sets up an IIS Express automatically.
