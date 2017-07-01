@@ -27,7 +27,7 @@ There is some open source code included in the GeoPathsx Project without modific
 Such code has its own open source license and is described below.
 ## Open Source License Used by Web Server Code at Run Time
 * Facebook C# SDK, dll v6.0.18, Outercurve Foundation, Appache-2.0 License
-* Connector/Net, MySql.Data.dll, v6.4.3.0, Oracle and/or affiliates, GNU General Public License, Version 2 
+* Connector/Net, MySql.Data.dll, v6.4.3.0, Oracle and/or affiliates, Version 2 of GNU General Public License 
 ## Open Source Licenses Used by Client Side Code at Run Time
 * [Facebook connect for javascript](https://connect.facebook.net/en_US/sdk.js), Facebook, license given in link.
 * [jquery](http://code.jquery.com/jquery-1.10.2.js), MIT License
@@ -36,7 +36,8 @@ Such code has its own open source license and is described below.
 ## Hosting Environment for Web Server Currently Used
 * IIS 7, Microsoft Commercial License
 * Microsoft .Net 4, Microsoft Commericial License
-* MySql v5.5 Database, Community Edition, GNU General Public License 
-## Build Tools for Web Server Code Currently Used
+* MySql v5.5 Database, Community Edition, Oracle and/or affiliates, Version 2 of GNU General Public License 
+## Debug Tools for Web Server Code Currently Used
 * Microsoft Visual Studio Express 2013 for Web, free personal license  
 Note: *Microsoft Visual Studio Community Edition*, which has an open source license, is a replacement for *Visual Studio Express 2013 for Web*, which is no longer available.
+* MySql WorkBench Community Edition, Oracle and/or affiliates, Version 2 of GNU General Public License
