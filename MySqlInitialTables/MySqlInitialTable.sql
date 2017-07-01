@@ -20,7 +20,7 @@
 
 CREATE DATABASE /*!32312 IF NOT EXISTS*/ `some_geopath` /*!40100 DEFAULT CHARACTER SET latin1 */;
 
-USE `geopath`;
+USE `some_geopath`;
 
 --
 -- Table structure for table `geopath`
