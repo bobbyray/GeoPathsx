@@ -1132,11 +1132,12 @@ window.app.OnDocReady = function (e) {
     // Create the controller and therefore the view and model therein.
     // Redirect if not https. 
     // Attribution: Thanks to stack overflow, https://stackoverflow.com/questions/4723213/detect-http-or-https-then-force-https-in-javascript
-    /* May comment out redirect for https for local debug */ 
-    if (location.protocol !== 'https:')
+    var bDebugging = typeof bLocalDebug === 'boolean' && bLocalDebug;  ////20171013 added stmt.
+    ////20171014 bDebugging = true;
+    if (!bDebugging && location.protocol !== 'https:')   ////20171013 Added !bDebugging && term.
     {
      location.href = 'https:' + window.location.href.substring(window.location.protocol.length);
-    }    
+    }
     // End of https redirect
     window.app.ctlr = new wigo_ws_Controller();
 };
