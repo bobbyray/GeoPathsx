@@ -1,5 +1,5 @@
 ﻿// Flag to indicate debugging locally.
-//// 'use strict';
+'use strict';
 /* 
 Copyright (c) 2017 Robert R Schomburg
 Licensed under terms of the MIT License, which is given at
