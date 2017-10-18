@@ -62,6 +62,8 @@ function wigo_ws_GeoPathMap(bShowMapCtrls) {
     var that = this;
     var map = null;     // Underlying map object.
     var mapPath = null; // Map overlay for current path.
+    var layerStreet = null; // Open street map layer. 
+    var layerWeather = null; // NASA weather layer.   
 
     if (typeof (bShowMapCtrls) !== 'boolean')
         bShowMapCtrls = true;
@@ -70,11 +72,68 @@ function wigo_ws_GeoPathMap(bShowMapCtrls) {
     // Event handler for window loaded can be set to this function.
     this.InitializeMap = function () {
         var latlngMtHood = new L.LatLng(45.3736111111111, -121.695833333333);
-        map = L.map('map-canvas').setView(latlngMtHood, 13);
+
+        map = L.map("map-canvas", {
+            center: latlngMtHood, 
+            zoom: 9, //20171014 was 3,
+            // Values are x and y here instead of lat and long elsewhere.
+            maxBounds: [
+                [-120, -220],
+                [120, 220]
+            ]
+        });
+        
         // add an OpenStreetMap tile layer
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { ////20170604 change osm to openstreetmap.
+        layerStreet = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { //20170604 change osm to openstreetmap.
+            opacity: 0.7, 
             attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
+        });
+        layerStreet.addTo(map);  
+
+        /* NASA weather layer
+        var template =
+                "//map1{s}.vis.earthdata.nasa.gov/wmts-webmerc/" +
+                "{layer}/default/{time}/{tileMatrixSet}/{z}/{y}/{x}.jpg";
+
+        layerWeather = L.tileLayer(template, {
+            layer: "MODIS_Terra_CorrectedReflectance_TrueColor",
+            tileMatrixSet: "GoogleMapsCompatible_Level9", // > Level9 did not help.
+            maxZoom: 9, // Zoom > 9 does not work. 
+            time: '2017-10-16', // '' or current date seems to not show west coast of US. but rest of map is ok?, // example "2013-11-04",
+            tileSize: 256,
+            subdomains: "abc",
+            noWrap: true,
+            continuousWorld: true,
+            opacity: 0.3, 
+            // Prevent Leaflet from retrieving non-existent tiles on the
+            // borders.
+            bounds: [
+                [-85.0511287776, -179.999999975],
+                [85.0511287776, 179.999999975]
+            ],
+            attribution:
+                "<a href='https://wiki.earthdata.nasa.gov/display/GIBS'>" +
+                "NASA EOSDIS GIBS</a>&nbsp;&nbsp;&nbsp;" +
+                "<a href='https://github.com/nasa-gibs/web-examples/blob/release/examples/leaflet/webmercator-epsg3857.js'>" +
+                "View Source" +
+                "</a>"
+        });
+        map.addLayer(layerWeather); // Works, but probably do not want to use.
+        */
+
+        var NASAGIBS_ModisTerraSnowCover = L.tileLayer('https://map1.vis.earthdata.nasa.gov/wmts-webmerc/MODIS_Terra_Snow_Cover/default/{time}/{tilematrixset}{maxZoom}/{z}/{y}/{x}.{format}', {
+            attribution: 'Imagery provided by services from the Global Imagery Browse Services (GIBS), operated by the NASA/GSFC/Earth Science Data and Information System (<a href="https://earthdata.nasa.gov">ESDIS</a>) with funding provided by NASA/HQ.',
+            bounds: [[-85.0511287776, -179.999999975], [85.0511287776, 179.999999975]],
+            minZoom: 1,
+            maxZoom: 8, // Fails for maxZoom > 8 
+            format: 'png',
+            time: '', // '' is current date.
+            tilematrixset: 'GoogleMapsCompatible_Level',
+            opacity: 0.75
+        });
+
+        map.addLayer(NASAGIBS_ModisTerraSnowCover);  
+
 
         /* 404 error when trying to load tiles (not found) May be find another topo layer later.
         var OpenTopoMap = L.tileLayer('http://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
