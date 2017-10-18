@@ -1132,9 +1132,8 @@ window.app.OnDocReady = function (e) {
     // Create the controller and therefore the view and model therein.
     // Redirect if not https. 
     // Attribution: Thanks to stack overflow, https://stackoverflow.com/questions/4723213/detect-http-or-https-then-force-https-in-javascript
-    var bDebugging = typeof bLocalDebug === 'boolean' && bLocalDebug;  ////20171013 added stmt.
-    ////20171014 bDebugging = true;
-    if (!bDebugging && location.protocol !== 'https:')   ////20171013 Added !bDebugging && term.
+    var bDebugging = typeof bLocalDebug === 'boolean' && bLocalDebug;  
+    if (!bDebugging && location.protocol !== 'https:')   
     {
      location.href = 'https:' + window.location.href.substring(window.location.protocol.length);
     }
