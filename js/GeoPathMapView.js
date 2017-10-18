@@ -82,6 +82,7 @@ function wigo_ws_GeoPathMap(bShowMapCtrls) {
                 [120, 220]
             ]
         });
+        map.setView(latlngMtHood, 8);  // Zoom was 13. Use 8 to match snow cover layer.
         
         // add an OpenStreetMap tile layer
         layerStreet = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { //20170604 change osm to openstreetmap.
