@@ -7,7 +7,7 @@ https://github.com/bobbyray/MitLicense/releases/tag/v1.0
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Gpx Paths</title>
+    <title>Gpx Paths Tester</title>
     <link rel="stylesheet" href="leaflet-1.0.3/leaflet.css" />
     <link rel="stylesheet" href="Css/GpxPaths2.css">
     <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
@@ -32,6 +32,7 @@ https://github.com/bobbyray/MitLicense/releases/tag/v1.0
             <li><a href="#tabs-upload">2) Upload</a></li>
             <li><a href="#tabs-edit">Edit</a></li>
             <li><a href="#tabs-view">View</a></li>
+            <li><a href="#tabs-stats">Stats</a></li>
             <li><a href="#tabs-about">About</a></li>
         </ul>
         <div id="tabs-define">
@@ -140,6 +141,62 @@ https://github.com/bobbyray/MitLicense/releases/tag/v1.0
             </p>
             <p>The GeoTrail app for your Android phone is available in the <i>Google Play Store</i>.</p>
             <p>The Pebble GeoTrail app for your watch is available in the <i>Pebble Store</i>.</p>
+        </div>
+        <div id='tabs-stats'>
+            <h2>Test for Record Stats</h2>
+            If not already signed in, <a href="#selectSignIn">select</a> <i>Sign In</i>&gt;<i>Facebook</i>.
+            <!-- ////20180222 sample for stats fields
+                this.nTimeStamp = 0; // integer. Time value of javascript Date object as an integer. Creation timesamp.
+                ////20180228 this.nModifiedTimeStamp = 0; // integer. Time value of javascript Date object as an inter. Mofication timestamp. 
+                this.msRunTime = 0;  // number. Run time for the recorded path in milliseconds.
+                this.mDistance = 0;  // number. Distance of path in meters.
+                this.caloriesKinetic = 0;      // number. Kinetic engery in calories to move body mass along the path.
+                this.caloriesBurnedCalc = 0;   // number. Calories burned calculated by the GeoTrail app.
+                //20180215 this.caloriesBurnedActual = 0; // Removed. 
+            -->
+            <div class="StatsRow">
+                <div class="SelectItemDiv">
+                    <span>Stats Items</span><br/>
+                    <select id="selectStatsItem">
+                        <option value="0">Select Stats Item</option>
+                    </select>
+                </div>
+                <div class="SelectItemDiv">
+                    <span>Deleted Items</span><br/>
+                    <select id="selectStatsDeletionItem">
+                        <option value="0">Select Deleted Item</option>
+                    </select>
+                </div>
+            </div>
+            <div class="StatsRow">
+                <label class="StatsItemLabel">TimeStamp</label> <input id="statsTimeStamp" type="datetime-local" />
+            </div>
+            <!-- ////20180228 Removed             <div class="StatsRow">
+                <label class="StatsItemLabel">ModifiedTimeStamp</label> <label class="StatsValueLabel"id="statsModifiedTimeStamp">mm/dd/yyyy hh:mm:sec</label>
+            </div> 
+            -->
+            <div class="StatsRow">
+                <label class="StatsItemLabel">RunTime (min:sec)</label> <input id="statsRunTimeMins" type="number" />:<input id="statsRunTimeSecs" type="number" />
+            </div>
+            <div class="StatsRow">
+                <label class="StatsItemLabel">Distance (meter)</label> <input id="statsDistance" type="number" />
+            </div>
+            <div class="StatsRow">
+                <label class="StatsItemLabel">Calories Kinetic</label> <input id="statsCaloriesKinetic" type="number" />
+            </div>
+            <div class="StatsRow">
+                <label class="StatsItemLabel">Calories Burned Calc</label> <input id="statsCaloriesBurnedCalc" type="number" />
+            </div>
+            <div class="StatsRow">
+                <button id="buDownloadStatsList">Download Stats List</button> 
+                <button id="buUploadStatsList">Upload Stats List</button>
+                <button id="buDeleteStatsList">Delete Stats List</button>
+            </div>  
+            <div class="StatsRow">
+                <button id="buNewStatsItem">New Stats Item</button> 
+                <button id="buSetStatsItemInList">Set Stats Item in List</button>
+                <button id="buDeleteStatsItemInList">Delete Stats Item from List</button> <!--////20180305 added -->
+            </div>          
         </div>
     </div>
 

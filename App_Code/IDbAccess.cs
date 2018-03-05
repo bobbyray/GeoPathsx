@@ -60,7 +60,7 @@ public interface IDbAccess
     /// <param name="sOwnerId">Id of owner of Gpx records in database.
     /// If null, any owner record is valid to included.</param>
     /// <param name="eShare">Indicates sharing of record: public, private or protected.</param>
-    /// <param name="list">Ref to list [out] that is filled database.</param>
+    /// <param name="list">Ref to list [out] that is filled from database.</param>
     /// <returns></returns>
     DbResult GetGpxList(string sOwnerId, byte eShare, GpxList list);
 
@@ -73,7 +73,7 @@ public interface IDbAccess
     /// <param name="eShare">Indicates sharing of record: public, private or protected.</param>
     /// <param name="gptSW">SouthWest corner of rectangle.</param>
     /// <param name="gptNE">NorthEast corner of rectangle.</param>
-    /// <param name="list">Ref to list [out] that is filled database.</param>
+    /// <param name="list">Ref to list [out] that is filled from database.</param>
     /// <returns></returns>
     DbResult GetGpxListByLatLon(string sOwnerId, byte eShare, GeoPt gptSW, GeoPt gptNE, GpxList list);
     
@@ -103,4 +103,19 @@ public interface IDbAccess
     /// <param name="accessHandle">Access handle for verification.</param>
     /// <returns></returns>
     DbResult Logout(string sOwnerId, string accessHandle);
+
+    ////20180226 **** Additions for Record Stats
+
+    /// <summary>
+    /// Stores list of GeoTrailRecordStats object in database.
+    /// Replaces an existing record in the database, or creates a new one
+    /// when there is no existing record.
+    /// </summary>
+    /// <param name="sOwnerId">Owner id to identify to whom the stats belong.</param>
+    /// <param name="statsList">List of stats objects to store in database.</param>
+    /// <param name="bOverWrite">true to always replace stats in database even if stats element in statsList is same as database record.</param>
+    /// <returns></returns>
+    DbResult UploadRecordStatsList(string sOwnerId, GeoTrailRecordStatsList statsList, bool bOverWrite = false);
+
+
 }

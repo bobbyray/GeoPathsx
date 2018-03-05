@@ -192,8 +192,8 @@ function wigo_ws_FaceBookAuthentication(yourAppId) {
             status: false, // check login status (set to false and alway call FB.getLoginStatus(function (response) in Authenticate()
             // to avoid double status changes.
             cookie: true, // enable cookies
-            xfbml: true,  // parse XFBML
-            version    : 'v2.4'  
+            xfbml: true, // parse XFBML
+            version: 'v2.5'    ////20180220 was v2.4 try 2.4 instead of v2.5 again
         });
     }
 

@@ -135,3 +135,27 @@ label {
     margin-left: 15px;
     margin-right: 15px;
 }
+
+/* Additions for Stats Tab */
+.StatsRow {
+    width: 100%;
+}
+.StatsItemLabel {
+    width: 30%;
+}
+.StatsValueLabel {
+    float: none;
+}
+#statsRunTimeMins,
+#statsRunTimeSecs {
+    width: 25%;
+}
+
+.SelectItemDiv {
+    float: left;
+}
+.SelectItemDiv span {
+    font-size: 1.0em;
+    font-weight: 900;
+    padding-left: 0.2em;
+}
