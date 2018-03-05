@@ -105,23 +105,10 @@ function wigo_ws_GeoTrailVersion() { // 20160610 added.
     this.bTermsOfUseAccepted = false; 
 }
 
-/* ////20180220 Move to GeoPathsApi2.js for clarity
-// Object for statistics for a trail that has been recorded.
-function wigo_ws_GeoTrailRecordStats() { 
-    this.nTimeStamp = 0; // integer. Time value of javascript Date object as an integer. Creation timesamp.
-    this.nModifiedTimeStamp = 0; // integer. Time value of javascript Date object as an inter. Mofication timestamp. 
-    this.msRunTime = 0;  // number. Run time for the recorded path in milliseconds.
-    this.mDistance = 0;  // number. Distance of path in meters.
-    this.caloriesKinetic = 0;      // number. Kinetic engery in calories to move body mass along the path.
-    this.caloriesBurnedCalc = 0;   // number. Calories burned calculated by the GeoTrail app.
-    //20180215 this.caloriesBurnedActual = 0; // Removed. 
-}
-*/
-
 // Object for the Model (data) used by html page.
 // Model should be sharable by all html pages for GeoPaths site.
 // However, Controller and View are different for each page.
-function wigo_ws_Model(deviceDetails) {   ////20180219 added arg  deviceDetails
+function wigo_ws_Model(deviceDetails) {   
     // ** Public members
 
     // Puts gpx data to server.
@@ -212,7 +199,7 @@ function wigo_ws_Model(deviceDetails) {   ////20180219 added arg  deviceDetails
     // immediately indicating user is not signed in and returns true indicating
     // transfer started (although it fails immediately).
     // indicating user is not signed in.
-    this.uploadRecordStatsList = function (arStats, onDone) { ////20180227 added
+    this.uploadRecordStatsList = function (arStats, onDone) { 
         var ah = this.getAccessHandle();
         var id = this.getOwnerId();
         var bStarted = false;
@@ -526,7 +513,7 @@ function wigo_ws_Model(deviceDetails) {   ////20180219 added arg  deviceDetails
     var sGeoTrailSettingsKey = 'GeoTrailSettingsKey'; 
     var sGeoTrailVersionKey = 'GeoTrailVersionKey'; 
     var sRecordStatsKey = 'GeoTrailRecordStatsKey';  
-    var sRecordStatsSchemaKey = 'GeoTrailRecordStatsSchemaKey';  ////20180215 added
+    var sRecordStatsSchemaKey = 'GeoTrailRecordStatsSchemaKey';  
 
     var api = new wigo_ws_GeoPathsRESTfulApi(); // Api for data exchange with server.
 
@@ -809,7 +796,6 @@ function wigo_ws_Model(deviceDetails) {   ////20180219 added arg  deviceDetails
             var sRecordStats = localStorage[sRecordStatsKey];
             if (sRecordStats !== undefined) {
                 arRecordStats = JSON.parse(sRecordStats);
-                ////20180215 add update arRecordStats is schema is down level.
                 // Check for updating schema.
                 if (schema.level < nSchemaSaved) {
                     // Change for scheme.level 1.
@@ -826,7 +812,7 @@ function wigo_ws_Model(deviceDetails) {   ////20180219 added arg  deviceDetails
         };
         // Schema number for arRecordStats when saving settings.
         // Increase nSchemaSaved when updating property of elements of arRecordStats.
-        var nSchemaSaved = 1;  // Must be set to new number when nSchema change is added. ////20180215 added
+        var nSchemaSaved = 1;  // Must be set to new number when nSchema change is added. 
         var schema = { level: 0 }; // Current schema leval.
         // Update each element of arRecords. Each element is a wigo_ws_GeoTrailRecordStats obj:
         //      add property nModifiedTimeStamp.
@@ -835,10 +821,6 @@ function wigo_ws_Model(deviceDetails) {   ////20180219 added arg  deviceDetails
             var statsEl;
             for (var i = 0; i < arRecordStats.length; i++) {
                 statsEl = arRecordStats[i];
-                ////20180228 // Add nModifiedTimeStamp property if missing.
-                ////20180228 if ((typeof(statsEl.nModifiedTimeStamp) === 'undefined')) {
-                ////20180228     statsEl.nModifiedTimeStamp = statsEl.nTimeStamp;  
-                ////20180228 }
                 // Ensure there is no nModifiedTimeStamp property.
                 if ((typeof (statsEl.nModifiedTimeStamp) !== 'undefined')) {
                     delete statsEl.nModifiedTimeStamp;
@@ -875,7 +857,7 @@ function wigo_ws_Model(deviceDetails) {   ////20180219 added arg  deviceDetails
         // Saves this object to local storage.
         this.SaveToLocalStorage = function() {
             localStorage[sRecordStatsKey] = JSON.stringify(arRecordStats);
-            schema.level = nSchemaSaved;   ////20180215 added.
+            schema.level = nSchemaSaved;   
             localStorage[sRecordStatsSchemaKey] = JSON.stringify(schema);
         };
 
@@ -1075,6 +1057,5 @@ function wigo_ws_Model(deviceDetails) {   ////20180219 added arg  deviceDetails
     geoTrailVersion.LoadFromLocalStorage();
 
     // Network information object. Wrapper for cordova-plugin-network-information.
-    ////20180219 var networkInfo = wigo_ws_NewNetworkInformation(window.app.deviceDetails.isiPhone());
     var networkInfo = wigo_ws_NewNetworkInformation(deviceDetails);
 }

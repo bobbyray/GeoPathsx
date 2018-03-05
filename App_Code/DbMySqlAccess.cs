@@ -454,7 +454,7 @@ public class DbMySqlAccess : IDbAccess
         return result;
     }
 
-    /* ////20180226 addition for Record Stats */
+    /* //20180226 addition for Record Stats */
 
     /// <summary>
     /// Stores list of GeoTrailRecordStats object in database.
@@ -1327,7 +1327,7 @@ public class OwnerRec  : MySqlTableAccess
 
 }
 
-/* ////20180226 add record for recordstats table */
+/* //20180226 add record for recordstats table */
 
 /// <summary>
 /// Record for MySql recordstats record.
@@ -1353,11 +1353,6 @@ public class RecordStatsRec : MySqlTableAccess
     /// Time value of javascript Date object as an integer. Creation timesamp.
     /// </summary>
     public long nTimeStamp = 0;
-
-    ////20180228      /// <summary>
-    ////20180228      /// Time value of javascript Date object as an integer. Modification timestamp. 
-    ////20180228     /// </summary>
-    ////20180228 public long nModifiedTimeStamp = 0;
 
     /// <summary>
     /// Run time for the recorded path in milliseconds.
@@ -1392,7 +1387,6 @@ public class RecordStatsRec : MySqlTableAccess
         this.sOwnerId = sOwnerId;
         this.nId = stats.nId;
         this.nTimeStamp = stats.nTimeStamp;
-        ////20180228 this.nModifiedTimeStamp = stats.nModifiedTimeStamp;
         this.msRunTime = stats.msRunTime;
         this.mDistance = stats.mDistance;
         this.caloriesKinetic = stats.caloriesKinetic;
@@ -1408,7 +1402,6 @@ public class RecordStatsRec : MySqlTableAccess
     {
         bool bSame = this.nId == stats.nId &&
                      this.nTimeStamp == stats.nTimeStamp &&
-                     ////20180228 this.nModifiedTimeStamp == stats.nModifiedTimeStamp &&
                      this.msRunTime == stats.msRunTime &&
                      this.mDistance == stats.mDistance &&
                      this.caloriesKinetic == stats.caloriesKinetic &&
@@ -1468,7 +1461,6 @@ public class RecordStatsRec : MySqlTableAccess
         this.nId = other.nId;
         this.sOwnerId = other.sOwnerId;
         this.nTimeStamp = other.nTimeStamp;
-        ////20180228 this.nModifiedTimeStamp = other.nModifiedTimeStamp;
         this.msRunTime = other.msRunTime;
         this.mDistance = other.mDistance;
         this.caloriesKinetic = other.caloriesKinetic;
@@ -1483,7 +1475,6 @@ public class RecordStatsRec : MySqlTableAccess
         this.nId = 0;
         this.sOwnerId = "";
         this.nTimeStamp = 0;
-        ////20180228 this.nModifiedTimeStamp = 0;
         this.msRunTime = 0;
         this.mDistance = 0;
         this.caloriesKinetic = 0;
@@ -1535,7 +1526,6 @@ public class RecordStatsRec : MySqlTableAccess
                 case 0: oCol.oValue = nId; oCol.sName = "nId"; oCol.oType = typeof(int); break;
                 case 1: oCol.oValue = sOwnerId; oCol.sName = "sOwnerId"; oCol.oType = typeof(string); break;
                 case 2: oCol.oValue = nTimeStamp; oCol.sName = "nTimeStamp"; oCol.oType = typeof(long); break;
-                ////20180228 case 3: oCol.oValue = nModifiedTimeStamp; oCol.sName = "nModifiedTimeStamp"; oCol.oType = typeof(long); break;
                 case 3: oCol.oValue = msRunTime; oCol.sName = "msRunTime"; oCol.oType = typeof(double); break;
                 case 4: oCol.oValue = mDistance; oCol.sName = "mDistance"; oCol.oType = typeof(double); break;
                 case 5: oCol.oValue = caloriesKinetic; oCol.sName = "caloriesKinetic"; oCol.oType = typeof(double); break;
@@ -1554,7 +1544,6 @@ public class RecordStatsRec : MySqlTableAccess
                 case 0: nId = (int)value.oValue; break;
                 case 1: sOwnerId = (string)value.oValue; break;
                 case 2: nTimeStamp = (long)value.oValue; break;
-                ////20180228 case 3: nModifiedTimeStamp = (long)value.oValue; break;
                 case 3: msRunTime = (double)value.oValue; break;
                 case 4: mDistance = (double)value.oValue; break;
                 case 5: caloriesKinetic = (double)value.oValue; break;

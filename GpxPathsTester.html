@@ -145,15 +145,6 @@ https://github.com/bobbyray/MitLicense/releases/tag/v1.0
         <div id='tabs-stats'>
             <h2>Test for Record Stats</h2>
             If not already signed in, <a href="#selectSignIn">select</a> <i>Sign In</i>&gt;<i>Facebook</i>.
-            <!-- ////20180222 sample for stats fields
-                this.nTimeStamp = 0; // integer. Time value of javascript Date object as an integer. Creation timesamp.
-                ////20180228 this.nModifiedTimeStamp = 0; // integer. Time value of javascript Date object as an inter. Mofication timestamp. 
-                this.msRunTime = 0;  // number. Run time for the recorded path in milliseconds.
-                this.mDistance = 0;  // number. Distance of path in meters.
-                this.caloriesKinetic = 0;      // number. Kinetic engery in calories to move body mass along the path.
-                this.caloriesBurnedCalc = 0;   // number. Calories burned calculated by the GeoTrail app.
-                //20180215 this.caloriesBurnedActual = 0; // Removed. 
-            -->
             <div class="StatsRow">
                 <div class="SelectItemDiv">
                     <span>Stats Items</span><br/>
@@ -171,10 +162,6 @@ https://github.com/bobbyray/MitLicense/releases/tag/v1.0
             <div class="StatsRow">
                 <label class="StatsItemLabel">TimeStamp</label> <input id="statsTimeStamp" type="datetime-local" />
             </div>
-            <!-- ////20180228 Removed             <div class="StatsRow">
-                <label class="StatsItemLabel">ModifiedTimeStamp</label> <label class="StatsValueLabel"id="statsModifiedTimeStamp">mm/dd/yyyy hh:mm:sec</label>
-            </div> 
-            -->
             <div class="StatsRow">
                 <label class="StatsItemLabel">RunTime (min:sec)</label> <input id="statsRunTimeMins" type="number" />:<input id="statsRunTimeSecs" type="number" />
             </div>
@@ -195,7 +182,7 @@ https://github.com/bobbyray/MitLicense/releases/tag/v1.0
             <div class="StatsRow">
                 <button id="buNewStatsItem">New Stats Item</button> 
                 <button id="buSetStatsItemInList">Set Stats Item in List</button>
-                <button id="buDeleteStatsItemInList">Delete Stats Item from List</button> <!--////20180305 added -->
+                <button id="buDeleteStatsItemInList">Delete Stats Item from List</button> 
             </div>          
         </div>
     </div>

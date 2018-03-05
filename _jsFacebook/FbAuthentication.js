@@ -193,7 +193,7 @@ function wigo_ws_FaceBookAuthentication(yourAppId) {
             // to avoid double status changes.
             cookie: true, // enable cookies
             xfbml: true, // parse XFBML
-            version: 'v2.5'    ////20180220 was v2.4 try 2.4 instead of v2.5 again
+            version: 'v2.5'    
         });
     }
 

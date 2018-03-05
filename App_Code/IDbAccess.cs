@@ -104,7 +104,7 @@ public interface IDbAccess
     /// <returns></returns>
     DbResult Logout(string sOwnerId, string accessHandle);
 
-    ////20180226 **** Additions for Record Stats
+    //20180226 **** Additions for Record Stats
 
     /// <summary>
     /// Stores list of GeoTrailRecordStats object in database.

@@ -75,18 +75,7 @@ function wigo_ws_NetworkInformation() {
 //                 If falses returns wigo_ws_NetworkInformation object.
 //  deviceDetails: Wigo_Ws_CordovaDeviceDetails obj. device details indicating android, IOS (iPhone), or perhaps other devices in the future.
 // Note: // cordova-plugin-network-information is not working for ios. Hangs app at start up.
-function wigo_ws_NewNetworkInformation(deviceDetails) {  ////20180209 arg was bIos.
-    /* ////20180219 redo 
-    if (typeof(bIos) !== 'boolean')
-        bIos = false;
-    var networkInfo;
-    if (bIos) {
-        networkInfo = {isOnline: function(){return this.isCellOnline() || this.isWiFiOnline();}, isCellOnline: function(){return true;}, 
-        isWiFiOnline: function(){return true;}, getBackOnlineInstr: function(){return ""}};  
-    } else { 
-        networkInfo = new wigo_ws_NetworkInformation(); 
-    }
-    */ 
+function wigo_ws_NewNetworkInformation(deviceDetails) {  
     var bDeviceDetails = typeof deviceDetails !== 'undefined';
     
     var networkInfo;

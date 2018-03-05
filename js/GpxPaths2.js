@@ -63,7 +63,7 @@ function wigo_ws_View() {
     //      by EAuthStatus in Service.cs.
     this.onAuthenticationCompleted = function (result) { };
 
-    ////20180224 additions for Stats tab 
+    //20180224 additions for Stats tab 
     // Uploads to web server a list of record stats items.
     // An item is replaced if it already exists at server, or is 
     // created if it does not exist.
@@ -321,7 +321,7 @@ function wigo_ws_View() {
                 $(buLoadFromServer).prop('disabled', true); // Disable loading list of paths from server.
                 buLoadFromServer.style.display = 'none';
                 break;
-            case this.eMode.stats: ////20180222 added
+            case this.eMode.stats: 
                 ShowSignInCtrls(true); 
                 break;
             case this.eMode.about:
@@ -607,20 +607,6 @@ function wigo_ws_View() {
         $(this).prop('data-minState', bMin.toString());
     });
 
-    /* ////20180228 move to StatsUIMgr
-    ////20180225 Add event handlers for Stats tab.
-    $('#buDownloadStatsList').bind('click', function (e) {
-    });
-    $('#buUploadStatsList').bind('click', function (e) {
-    });
-    $('#buUpdateStatsList').bind('click', function (e) {
-    });
-    $('#buNewStatsItem').bind('click', function (e) {
-    });
-    $('#buSetStatsItemInList').bind('click', function (e) {
-    });
-    */
-
     $(tabs).tabs();
     $(tabs).on("tabsactivate", function (event, ui) {
         that.ClearStatus();
@@ -637,13 +623,13 @@ function wigo_ws_View() {
         SetMapPanelTop();
     });
 
-    ////20180228 Additions for Stats Tab
+    //20180228 Additions for Stats Tab
     // Helper for controls used on stats tab.
-    function StatsUIMgr(view) { ////20180228 added
+    function StatsUIMgr(view) { 
         // **** Controls
         var jqselectStatsItem = $('#selectStatsItem');
         var selectStatsItem = jqselectStatsItem[0]; 
-        var jqselectStatsDeletionItem = $('#selectStatsDeletionItem'); ////20180305 added
+        var jqselectStatsDeletionItem = $('#selectStatsDeletionItem'); 
         var selectStatsDeletionItem = jqselectStatsDeletionItem[0]; 
         var jqstatsTimeStamp = $('#statsTimeStamp');
         var jqstatsRunTimeMins = $('#statsRunTimeMins');
@@ -663,8 +649,6 @@ function wigo_ws_View() {
 
         // Delete stats list at server.
         $('#buDeleteStatsList').bind('click', function (e) {
-            //// SetStatsItemList(selectStatsDeletionItem, arDeleteStats);
-            //// RemoveFromStatsItemList(selectStatsItem, arStats);
         });
 
         // Clear stats item.
@@ -680,47 +664,6 @@ function wigo_ws_View() {
         // on values in the stats item controls (fields).
         // Also removes the stats item from the deletion list if need be.
         $('#buSetStatsItemInList').bind('click', function (e) {
-            /* ////20180305 refactor 
-            //// var stats = new wigo_ws_GeoTrailRecordStats(); 
-            var stats = GetStatsItemCtrls();
-            // Quit is timestamp is invalid.
-            if (Number.isNaN(stats.nTimeStamp)) {
-                alert("Timestamp is invalid. Enter Stats Item fields.");
-                return;
-            }
-
-            // Replace existing stats obj in arStats or add new obj if not in array.
-            var ixStats = FindStatsObjIx(arStats, stats.nTimeStamp); ////20180304 added arStats arg
-            if (ixStats > -1) {
-                arStats[ixStats] = stats; // Replace existing stats obj.
-            } else {
-                // Add stats to array of stats.
-                arStats.push(stats);
-            }
-
-            // Form the new option.
-            var dateTimeStamp = new Date(stats.nTimeStamp);
-            var sDate = dateTimeStamp.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            var newOption = new Option(sDate, stats.nTimeStamp, true, true);
-            newOption.setAttribute('data-msDate', stats.nTimeStamp.toFixed(0)); 
-
-            if (selectStatsItem.length < 1) {
-                // selection list is empty, append a prompt.
-                selectStatsItem.add(new Option("Select Stats Item"), 0);
-            }
-            ////20180303 selectStatsItem.add(newOption, 1);
-
-            // Replace or add new option in selectStatsItem control.
-            var ixOption = FindStatsOptionIx(selectStatsItem, stats.nTimeStamp);  ////20180304 added selectStatsItem arg.
-            if (ixOption > -1) {
-                // Replace existing option with new option.
-                selectStatsItem.remove(ixOption);
-                selectStatsItem.add(newOption, ixOption)
-            } else {
-                // Add new option at index 1 because index 0 is a prompt to select a stats item.
-                selectStatsItem.add(newOption, 1);
-            }
-            */
             var stats = SetStatsItemList(selectStatsItem, arStats);
             if (stats)
                 RemoveFromStatsItemList(selectStatsDeletionItem, arDeleteStats, stats.nTimeStamp);
@@ -729,7 +672,7 @@ function wigo_ws_View() {
         // Deletes a stats item in the deletion list (or replaces an existing one) based
         // on values in the stats item controls (fields). Also removes the stats item
         // from the selection list if need be.
-        $('#buDeleteStatsItemInList').bind('click', function (e) {  ////20180305 added
+        $('#buDeleteStatsItemInList').bind('click', function (e) {  
             var stats = SetStatsItemList(selectStatsDeletionItem, arDeleteStats);
             if (stats)
                 RemoveFromStatsItemList(selectStatsItem, arStats, stats.nTimeStamp);
@@ -743,8 +686,7 @@ function wigo_ws_View() {
         //  arStats: ref to array of wigo_ws_GeoTrailRecordStats objs. the data array to which stats obj is added/replaced.
         // Returns: ref to wigo_ws_GeoTrailRecordStats. The stats obj obtained from the stats item controls.
         //          null if stats items controls are not all valid.
-        function SetStatsItemList(selectStatsItem, arStats) { ////20150305 added
-            //// var stats = new wigo_ws_GeoTrailRecordStats(); 
+        function SetStatsItemList(selectStatsItem, arStats) { 
             var stats = GetStatsItemCtrls();
             // Quit is timestamp is invalid.
             if (Number.isNaN(stats.nTimeStamp)) {
@@ -753,7 +695,7 @@ function wigo_ws_View() {
             }
 
             // Replace existing stats obj in arStats or add new obj if not in array.
-            var ixStats = FindStatsObjIx(arStats, stats.nTimeStamp); ////20180304 added arStats arg
+            var ixStats = FindStatsObjIx(arStats, stats.nTimeStamp); 
             if (ixStats > -1) {
                 arStats[ixStats] = stats; // Replace existing stats obj.
             } else {
@@ -771,10 +713,9 @@ function wigo_ws_View() {
                 // selection list is empty, append a prompt.
                 selectStatsItem.add(new Option("Select Stats Item"), 0);
             }
-            ////20180303 selectStatsItem.add(newOption, 1);
 
             // Replace or add new option in selectStatsItem control.
-            var ixOption = FindStatsOptionIx(selectStatsItem, stats.nTimeStamp);  ////20180304 added selectStatsItem arg.
+            var ixOption = FindStatsOptionIx(selectStatsItem, stats.nTimeStamp);  
             if (ixOption > -1) {
                 // Replace existing option with new option.
                 selectStatsItem.remove(ixOption);
@@ -792,7 +733,7 @@ function wigo_ws_View() {
         //  arStats: ref to array of wigo_ws_GeoTrailRecordStats objs. the array of stats data objects.
         //  nTimeStamp: number. the timestamp in milliseconds identifying the stats to remove.
         // Note: Ok to call even if the stats option or data object is not found.
-        function RemoveFromStatsItemList(selectStatsList, arStats, nTimeStamp) { ////20180305 added
+        function RemoveFromStatsItemList(selectStatsList, arStats, nTimeStamp) { 
             // Remove option element from selectStatsList if the option exists.
             var ixOption = FindStatsOptionIx(selectStatsList, nTimeStamp);
             if (ixOption > 0) {
@@ -800,7 +741,7 @@ function wigo_ws_View() {
             }
             
             // Remove element from arStats if element exists.
-            var ixStats = FindStatsObjIx(arStats, nTimeStamp); ////20180304 added arStats arg
+            var ixStats = FindStatsObjIx(arStats, nTimeStamp); 
             if (ixStats > -1) {
                 arStats.splice(ixStats, 1);
             }
@@ -808,16 +749,6 @@ function wigo_ws_View() {
 
         // Sets the stats item controls for the item selected in the selection list.
         jqselectStatsItem.bind('click',function(e){
-            /* ////20180305 refactor
-            if (selectStatsItem.selectedIndex > 0) {
-                var option = selectStatsItem.item(selectStatsItem.selectedIndex);
-                var nTimeStamp = Number.parseInt(option.getAttribute('data-msdate'));
-                var stats = FindStatsObj(nTimeStamp);
-                if (stats) {
-                    SetStatsItemCtrls(stats);
-                }
-            }
-            */
             SetStatsItemCtrlsFromSelected(selectStatsItem, arStats);
         });
 
@@ -830,7 +761,7 @@ function wigo_ws_View() {
         // Arg:
         //  selectStatsItem: HTML Select control. the select control.
         //  arStats: ref to array of wigo_ws_GeoTrailRecordStats objs. the array of stats data objects for search to match selected item.
-        function SetStatsItemCtrlsFromSelected(selectStatsItem, arStats) { ////20180305 added 
+        function SetStatsItemCtrlsFromSelected(selectStatsItem, arStats) { 
             if (selectStatsItem.selectedIndex > 0) {
                 var option = selectStatsItem.item(selectStatsItem.selectedIndex);
                 var nTimeStamp = Number.parseInt(option.getAttribute('data-msdate'));
@@ -844,14 +775,13 @@ function wigo_ws_View() {
         // ****
         // Array of wigo_ws_GeoTrailRecordStats objects for uploading or downloading.
         var arStats = [];        // Stats items to uploading/downloading.
-        var arDeleteStats = [];  // Stats items for deletion when uploading. ////20180305 added
+        var arDeleteStats = [];  // Stats items for deletion when uploading. 
 
         // Finds an object in arStats.
         // Arg:
         //  arStats: array of wigo_ws_GeoTrailRecordStats objects.
         //  nTimeStamp: number. timestamp in milliseconds of object to find.
         // Returns: ix in arStats to the wigo_ws_GeoTrailRecordStats obj if found, or -1 if not found.
-        ////20180304 function FindStatsObjIx(nTimeStamp) {
         function FindStatsObjIx(arStats, nTimeStamp) {
             var foundIx = -1;
             for (var i = 0; i < arStats.length; i++) {
@@ -869,18 +799,8 @@ function wigo_ws_View() {
         //  arStats: array of wigo_ws_GeoTrailRecordStats object.
         //  nTimeStamp: number. timestamp in milliseconds of object to find.
         // Returns: ref to wigo_ws_GeoTrailRecordStats if found, or null if not found.
-        function FindStatsObj(arStats, nTimeStamp) { ////20180304 added arStats arg.
-            /* ////20180303 refactor
-            var foundStats = null;
-            for (var i = 0; i < arStats.length; i++) {
-                if (arStats[i].nTimeStamp === nTimeStamp) {
-                    foundStats = arStats[i];
-                    break;
-                }
-            }
-            return foundStats;
-            */
-            var ix = FindStatsObjIx(arStats, nTimeStamp); ////20180304 added arStats arg.
+        function FindStatsObj(arStats, nTimeStamp) { 
+            var ix = FindStatsObjIx(arStats, nTimeStamp); 
             if (ix > -1)
                 return arStats[ix];
             else
@@ -892,7 +812,6 @@ function wigo_ws_View() {
         //  selectStatsItem: ref to HTML Select element. 
         //  nTimeStamp: number. timestamp in milliseconds of data-msdate attribute to find.
         // Returns: number for index of HTML Option item found, or -1 if not found.
-        ////20180304 function FindStatsOptionIx(nTimeStamp) {
         function FindStatsOptionIx(selectStatsItem, nTimeStamp) {
                 var ixFound = -1;
             var item;
@@ -954,20 +873,6 @@ function wigo_ws_View() {
         //       is returned resolved to milliseconds for the day.
         function GetDateCtrl(jqctrl, bUpdateDataAttr) {
             //  jqctrl: jquery input control of type datetime-local.
-            ////20180302 var newDate = new Date(jqctrl.val());
-            ////20180302 var msCurDate = jqctrl.attr('data-msdate');
-            ////20180302 var curDate = new Date(msCurDate);
-            ////20180302 var bSame = curDate.getFullYear() === newDate.getFullYear() &&
-            ////20180302             curDate.getMonth() === newDate.getMonth() &&
-            ////20180302             curDate.getDate() === newDate.getDate() &&
-            ////20180302             curDate.getHours() === newDate.getHours() &&
-            ////20180302             curDate.getMinutes === newDate.getMinutes();
-            
-            ////20180303 // The data-msdate attribute of control alway has the date value to return
-            ////20180303 // because the on change event handler for the control updates data-msdate.
-            ////20180303 var msDate = jqctrl.attr('data-msdate');
-            ////20180303 return Number.parseInt(msDate);
-
             if (typeof bUpdateDataAttr !== 'boolean')
                 bUpdateDataAttr = true;
 
@@ -999,12 +904,9 @@ function wigo_ws_View() {
         function SetRunTimeCtrls(jqmins, jqsecs, msRunTime) {
             var secs = msRunTime / 1000;
             var mins = Math.floor(secs / 60);
-            ////20180303 secs = secs % 60;
             secs = secs - 60 * mins;
-            ////20180301 jqmins.attr('data-msRunTime',msRunTime);
             jqmins.val(mins);
             jqsecs.val(secs);
-            ////20180301 jqsecs.attr('data-msRunTime', msRunTime);
         }
 
         // Get run time from minutes and seconds input controls.
@@ -1135,7 +1037,7 @@ function wigo_ws_View() {
     // Shows or hides sigin controls including user name and signin droplist.
     // Arg:
     //  bShow: boolean indicating to show.
-    function ShowSignInCtrls(bShow) { ////20180222 added due to refactoring.
+    function ShowSignInCtrls(bShow) { 
         if (bShow) {
             divOwnerId.style.display = 'block';
         } else {
@@ -1147,13 +1049,6 @@ function wigo_ws_View() {
     // Arg:
     //  bShow: boolean indicating to show.
     function ShowEditCtrls(bShow) {
-        /* ////20180222 refactor
-        if (bShow) {
-            divOwnerId.style.display = 'block';
-        } else {
-            divOwnerId.style.display = 'none';
-        }
-        */
         ShowSignInCtrls(bShow);
 
         ShowPathInfoDiv(bShow);
@@ -1173,7 +1068,7 @@ function wigo_ws_View() {
 
     // Set Facebook login.
     // NOTE: appid must be in sync for private\appSettings.config
-    // var fb = new wigo_ws_FaceBookAuthentication('694318660701967'); //MainAppId ////20180220 !!!! restore when done testing.
+    // var fb = new wigo_ws_FaceBookAuthentication('694318660701967'); //MainAppId $$$$ put back when done
     var fb = new wigo_ws_FaceBookAuthentication('870220976445067'); //LocalTestingAppId.
 
     fb.callbackAuthenticated = cbFbAuthenticationCompleted;

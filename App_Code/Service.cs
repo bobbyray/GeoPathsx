@@ -303,12 +303,10 @@ public class Service
     ///     403 for forbidden, authentication failed.
     ///     500 for internal server error, database access error.
     /// </remarks>
-    [OperationContract]  ////20180226 added 
+    [OperationContract]  
     [WebInvoke(Method = "POST", RequestFormat = WebMessageFormat.Xml, ResponseFormat = WebMessageFormat.Json, UriTemplate = "uploadrecordstatslist/{sOwnerId}?ah={accessHandle}")]
     public string UploadRecordStatsList(GeoTrailRecordStatsList statsList, string sOwnerId, string accessHandle)
     {
-        ////20180226 System.Net.HttpStatusCode httpStatusError = System.Net.HttpStatusCode.InternalServerError;
-        
         IDbAccess acc = MyDbAccess.Get();
         DoConnectionCallback oCode = delegate()
         {
@@ -725,7 +723,7 @@ public class AuthResult
     string _msg = String.Empty;
 }
 
-/* ////20180226 **** additions for Stats for Geotrail Recorded Trail.*/
+/* //20180226 **** additions for Stats for Geotrail Recorded Trail.*/
 
 /// <summary>
 /// Stats for Geotrail Recorded Trail.
@@ -754,17 +752,6 @@ public class GeoTrailRecordStats
         set { _nTimeStamp = value; }
     }
     long _nTimeStamp = 0;
-
-    ////20180228 /// <summary>
-    ////20180228 /// Time value of javascript Date object as an integer. Mofication timestamp. 
-    ////20180228 /// </summary>
-    ////20180228 [DataMember]
-    ////20180228 public long nModifiedTimeStamp
-    ////20180228 {
-    ////20180228     get { return _nModifiedTimeStamp; }
-    ////20180228     set { _nModifiedTimeStamp = value; }
-    ////20180228 }
-    ////20180228 long _nModifiedTimeStamp = 0;
 
     /// <summary>
     /// Run time for the recorded path in milliseconds.

@@ -90,7 +90,7 @@ function wigo_ws_GeoPathsRESTfulApi() {
         return bOk;
     };
 
-    ////20180225 Add members for Record Stats.
+    //20180225 Add members for Record Stats.
     // Downloads list of record stats items from server.
     // Args
     //  sOwnerId: string for owner id.
@@ -107,7 +107,7 @@ function wigo_ws_GeoPathsRESTfulApi() {
             onDownloadRecordStatsList = onDone;
         else
             onDownloadRecordStatsList = function (bOk, arStats, sStatus) { };
-        //// $$$$Fix var bOk = base.Get(eState.GpxGetListByLatLon, sGpxGetListByLatLonUri(sOwnerId, nShare, gptSW, gptNE, ah));
+        // $$$$Fix var bOk = base.Get(eState.GpxGetListByLatLon, sGpxGetListByLatLonUri(sOwnerId, nShare, gptSW, gptNE, ah));
         return bOk;
     };
 
@@ -126,7 +126,7 @@ function wigo_ws_GeoPathsRESTfulApi() {
     // Remarks: If a database record is exists and is exactly the same as the arStats element,
     // the database is not written, only read.
     // If the arStats element does not exist in the database, it is inserted.
-    this.UploadRecordStatsList = function (sOwnerId, ah, arStats, onDone) {  ////20180227 added
+    this.UploadRecordStatsList = function (sOwnerId, ah, arStats, onDone) {  
         // Save async completion handler.
         if (typeof (onDone) === 'function')
             onUploadRecordStatsList = onDone;
@@ -225,7 +225,7 @@ function wigo_ws_GeoPathsRESTfulApi() {
 
     // Enumeration for api transfer state. 
     var eState = { Initial: 0, GpxPut: 1, GpxGetList: 2, Authenticate: 3, Logout: 4, GpxDelete: 5, GpxGetListByLatLon: 6, 
-                   DownloadRecordStatsList: 7, UploadRecordStatsList: 8}; ////20180227 added 7 and 8.
+                   DownloadRecordStatsList: 7, UploadRecordStatsList: 8}; 
 
     // Enumeration for login status return by OAuth server.
     // Note: same values as for FacebookAuthentication.eAuthResult (keep synced).
@@ -336,7 +336,7 @@ function wigo_ws_GeoPathsRESTfulApi() {
         return s;
     }
 
-    ////20180227 addition for record stats
+    //20180227 addition for record stats
     // Returns relative URI for UploadRecordStatsList api.
     // Args:
     //  sOwnerId: string. owner id for stats.
@@ -393,7 +393,7 @@ function wigo_ws_GeoPathsRESTfulApi() {
     //      arStats [out]: ref to array of wigo_ws_GeoTrailRecordStats objects received.
     //      sStatus: status message.
     //      Return: void
-    var onDownloadRecordStatsList = function (bOk, arStats, sStatus) { }; ////20180227 added
+    var onDownloadRecordStatsList = function (bOk, arStats, sStatus) { }; 
 
     // UploadRecordStatsList has completed asynchronously.
     // Handler Signature:
@@ -513,7 +513,7 @@ function wigo_ws_GeoPathsRESTfulApi() {
                 var sLogoutMsg = base.FormCompletionStatus(req);
                 onLogout(bOk, sLogoutMsg);
 
-            case eState.UploadRecordStatsList:  ////20180227 added.
+            case eState.UploadRecordStatsList:  
                 if (bOk)
                     sStatus = "UploadRecordStatsList succeeded."
                 else
@@ -859,12 +859,11 @@ wigo_ws_GpxPath.AttachFcns = function (me) {
 // wigo_ws_GeoTrailRecordStats          GeoTrailRecordStats
 // [] of wigo_ws_GeoTrailRecordStats    GeoTrailRecordStatsList
 
-// Object for exchanging with server statistics for a trail that has been recorded. ////20180220 moved here from Model2.js.
+// Object for exchanging with server statistics for a trail that has been recorded. 
 // Note: Also used by Model2.js to save to localStorage.
 function wigo_ws_GeoTrailRecordStats() {
-    this.nId = 0; // interger. database sequence number at server. 0 indicates new. ////20180226 added
+    this.nId = 0; // interger. database sequence number at server. 0 indicates new. 
     this.nTimeStamp = 0; // integer. Time value of javascript Date object as an integer. Creation timesamp.
-    ////20180228 this.nModifiedTimeStamp = 0; // integer. Time value of javascript Date object as an integer. Modification timestamp. 
     this.msRunTime = 0;  // number. Run time for the recorded path in milliseconds.
     this.mDistance = 0;  // number. Distance of path in meters.
     this.caloriesKinetic = 0;      // number. Kinetic engery in calories to move body mass along the path.
