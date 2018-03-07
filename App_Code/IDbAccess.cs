@@ -54,7 +54,7 @@ public interface IDbAccess
     DbResult GpxDelete(string sOwnerId, int nId); 
 
     /// <summary>
-    /// Sets a list of Gpx obj found in database.
+    /// Gets a list of Gpx objs found in database.
     /// Returns result of of database access.
     /// </summary>
     /// <param name="sOwnerId">Id of owner of Gpx records in database.
@@ -117,5 +117,13 @@ public interface IDbAccess
     /// <returns></returns>
     DbResult UploadRecordStatsList(string sOwnerId, GeoTrailRecordStatsList statsList, bool bOverWrite = false);
 
-
+    /// <summary>
+    /// Gets a list of GeoTrailRecordStats objects found in database.
+    /// Returns result of of database access.
+    /// </summary>
+    /// <param name="sOwnerId">Id of owner of Gpx records in database.
+    /// If null, any owner record is valid to included.</param>
+    /// <param name="list">Ref to list [out] that is filled from database.</param>
+    /// <returns></returns>
+    DbResult DownloadRecordStatsList(string sOwnerId, GeoTrailRecordStatsList list);  ////20180306 added
 }

@@ -328,6 +328,53 @@ public class Service
     }
 
 
+
+    /// <summary>
+    /// Gets a list of Gpx records from the database.
+    /// </summary>
+    /// <param name="sOwnerId">owner id of gpx records.</param>
+    /// <param name="sShare">Type of sharing with other owners allowed.</param>
+    /// <returns></returns>
+    /// <remarks>
+    /// The http request status code:
+    ///     200 for ok.
+    ///     403 for forbidden, authentication failed.
+    ///     500 for internal server error, database access error.
+    /// </remarks>
+    [OperationContract]
+    [WebInvoke(Method = "GET", ResponseFormat = WebMessageFormat.Json, UriTemplate = "downloadrecordstatslist/{sOwnerId}?ah={accessHandle}")]
+    public GeoTrailRecordStatsList DownloadRecordStatsList(string sOwnerId, string accessHandle)
+    {
+        GeoTrailRecordStatsList list = new GeoTrailRecordStatsList();
+        System.Net.HttpStatusCode httpStatusError = System.Net.HttpStatusCode.InternalServerError;
+
+        IDbAccess acc = MyDbAccess.Get();
+        DoConnectionCallback oCode = delegate()
+        {
+            DbResult oResult = acc.ValidateAccess(sOwnerId, accessHandle);
+            if (oResult.nResult == DbResult.EResult.ERROR)
+                httpStatusError = System.Net.HttpStatusCode.Forbidden;
+            if (oResult.bOk)
+            {
+                oResult = acc.DownloadRecordStatsList(sOwnerId, list);
+            }
+
+            return oResult;
+        };
+        DbResult result = acc.DoConnection(oCode);
+
+        if (!result.bOk)
+        {
+            WebOperationContext.Current.OutgoingResponse.StatusCode = httpStatusError;
+        }
+
+        return list;
+    }
+
+
+
+
+
     // Add more operations here and mark them with [OperationContract]
 
 }
@@ -731,6 +778,7 @@ public class AuthResult
 [DataContract]
 public class GeoTrailRecordStats
 {
+    /* ////20180306 remove. database sequence id not exchanged between server and client.
     /// <summary>
     /// Database sequence number at server. 0 indicates new.
     /// </summary>
@@ -741,6 +789,7 @@ public class GeoTrailRecordStats
         set { _nId = value;}
     }
     int _nId = 0;
+    */
 
     /// <summary>
     /// Time value of javascript Date object as an integer. Creation timesamp.

@@ -68,21 +68,25 @@ function wigo_ws_View() {
     // An item is replaced if it already exists at server, or is 
     // created if it does not exist.
     // Arg:
+    //  nMode: byte value of this.eMode enumeration.
     //  arStats: array of wigo_ws_GeoTrailRecordStats objs.
     //  onDone: callback after async completion, signature:
     //      bOk: boolean: true for sucessful upload.
     //      sStatus: string: description for the update result.
     //      Returns: void
-    this.onUploadRecordStatsList = function(arStats, onDone) {};
+    //  Synchronous return: boolean. true indicates upload successfully started.
+    this.onUploadRecordStatsList = function (nMode, arStats, onDone) { return false;};
 
     // Downloads from web server a list of all the record stats items.
     // Args:
+    //  nMode: byte value of this.eMode enumeration.
     //  onDone: callback after async completion, signature:
     //      bOk: boolean: true for sucessful download.
     //      arStats: array of wigo_ws_GeoTrailRecordStats objs. the downloaded list.
     //      sStatus: string. description for the download result.
     //      Return: void
-    this.onDownloadRecordStatsList = function (onDone) { };
+    //  Synchronous return: boolean. true indicates upload successfully started.
+    this.onDownloadRecordStatsList = function (nMode, onDone) { return false;};
 
     // ** Public members
 
@@ -640,11 +644,22 @@ function wigo_ws_View() {
 
         // **** Add event handlers for Stats tab.
         // Download stats list from server.
-        $('#buDownloadStatsList').bind('click', function (e) {
+        $('#buDownloadStatsList').bind('click', function (e) { ////20180306 added
+            var bStarted = view.onDownloadRecordStatsList(nMode, DownloadStatsListCompleted);
+            if (!bStarted)
+                alert("Downloading RecordStatsList failed to start.");
         });
 
         // Upload stats list to server.
         $('#buUploadStatsList').bind('click', function (e) {
+            var bStarted = false;
+            if (arStats.length > 0) {
+                bStarted = view.onUploadRecordStatsList(nMode, arStats, UploadStatsListCompleted);
+                if (!bStarted)
+                    alert('Uploading RecordStatsList failed to start.')
+            } else {
+                alert("There are no stats items to upload.");
+            }
         });
 
         // Delete stats list at server.
@@ -693,7 +708,6 @@ function wigo_ws_View() {
                 alert("Timestamp is invalid. Enter Stats Item fields.");
                 return null;
             }
-
             // Replace existing stats obj in arStats or add new obj if not in array.
             var ixStats = FindStatsObjIx(arStats, stats.nTimeStamp); 
             if (ixStats > -1) {
@@ -703,11 +717,13 @@ function wigo_ws_View() {
                 arStats.push(stats);
             }
 
+            ////20180307 Refactor this snippet as FormStatsSelectOption(stats)(selectStatsItem, arStats)
             // Form the new option.
             var dateTimeStamp = new Date(stats.nTimeStamp);
             var sDate = dateTimeStamp.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
             var newOption = new Option(sDate, stats.nTimeStamp, true, true);
             newOption.setAttribute('data-msDate', stats.nTimeStamp.toFixed(0));
+            ////20180307 end refactor snippet.
 
             if (selectStatsItem.length < 1) {
                 // selection list is empty, append a prompt.
@@ -726,6 +742,20 @@ function wigo_ws_View() {
             }
             return stats;
         }
+
+        // Forms select control option based on a stats timestamp.
+        // Arg:
+        //  stats: wigo_ws_GeoTrailRecordStats obj. stats.nTimesTamp is used to the option.
+        // Returns: new Option element for a HTML Select element.
+        function FormStatsSelectOption(stats) { ////20180307 refactor 
+            // Form the new option.
+            var dateTimeStamp = new Date(stats.nTimeStamp);
+            var sDate = dateTimeStamp.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            var newOption = new Option(sDate, stats.nTimeStamp, true, true);
+            newOption.setAttribute('data-msDate', stats.nTimeStamp.toFixed(0));
+            return newOption;
+        }
+
 
         // Removes a stats items from a selection and from an array of stats.
         // Args:
@@ -772,10 +802,52 @@ function wigo_ws_View() {
             }
         }
 
+        // **** Completion handlers for transfer with the server.
+        function UploadStatsListCompleted(bOk, sStatus) {
+            if (bOk) {
+                view.ShowStatus("Successfully uploaded Stats List.", false);
+            } else {
+                view.ShowStatus("Upoad of Stats List failed: " + sStatus);
+            }
+        }
+
+        function DownloadStatsListCompleted(bOk, arDownloadedStats, sStatus) {  ////20180306 added
+            if (bOk) {
+                // clear the selectStatsItem and selecStatDeletion controls and associated stats data arrays.
+                ClearSelectCtrl(selectStatsItem, arStats);
+                ClearSelectCtrl(selectStatsDeletionItem, arDeleteStats);
+                // Add the downloaded stats to the selectStatsItem control and associated data array.
+                var option;
+                for (var i = 0; i < arDownloadedStats.length; i++) {
+                    option = FormStatsSelectOption(arDownloadedStats[i]);
+                    selectStatsItem.add(option);
+                    arStats.push(arDownloadedStats[i])
+                }
+                var sMsg = "Successfully download {0} stats items.".format(arDownloadedStats.length);
+                view.ShowStatus(sMsg, false);
+            } else {
+                view.ShowStatus("Download of stats failed: " + sStatus);
+            }
+
+        }
+
         // ****
         // Array of wigo_ws_GeoTrailRecordStats objects for uploading or downloading.
         var arStats = [];        // Stats items to uploading/downloading.
         var arDeleteStats = [];  // Stats items for deletion when uploading. 
+
+        // Clears a html select control and its associated stats data array.
+        // Args:
+        //  selectCtrl: ref to HTML Select Element. the select control.
+        //  arStats: ref to array of wigo_ws_GeoTrailRecordStats obj. the associated stats data objects.
+        function ClearSelectCtrl(selectCtrl, arStats) { ////20180307 added
+            // Remove all the option elements from selectCtrl, except item(0) which is a prompt.
+            for (var i = 1; i < selectCtrl.length; i++) {
+                selectCtrl.remove(i);
+            }
+            // Remove all elements in the associated data array of stats objects.
+            arStats.splice(0,arStats.length)
+        }
 
         // Finds an object in arStats.
         // Arg:
@@ -1454,6 +1526,37 @@ function wigo_ws_Controller() {
             view.ShowStatus("Authentication failed.");
         }
     };
+
+    // Uploads to web server a list of record stats items.
+    // An item is replaced if it already exists at server, or is 
+    // created if it does not exist.
+    // Arg:
+    //  nMode: byte value of this.eMode enumeration.
+    //  arStats: array of wigo_ws_GeoTrailRecordStats objs.
+    //  onDone: callback after async completion, signature:
+    //      bOk: boolean: true for sucessful upload.
+    //      sStatus: string: description for the update result.
+    //      Returns: void
+    //  Synchronous return: boolean. true indicates upload successfully started.
+    view.onUploadRecordStatsList = function (nMode, arStats, onDone) {
+        var bStarted = model.uploadRecordStatsList(arStats, onDone)
+        return bStarted;
+    };
+
+    // Downloads from web server a list of all the record stats items.
+    // Args:
+    //  nMode: byte value of this.eMode enumeration.
+    //  onDone: callback after async completion, signature:
+    //      bOk: boolean: true for sucessful download.
+    //      arStats: array of wigo_ws_GeoTrailRecordStats objs. the downloaded list.
+    //      sStatus: string. description for the download result.
+    //      Return: void
+    //  Synchronous return: boolean. true indicates upload successfully started.
+    view.onDownloadRecordStatsList = function (nMode, onDone) {////20180306 added
+        var bStarted = model.downloadRecordStatsList(onDone);
+        return bStarted;
+    }
+
 
     // ** Private members
     var xmlGpx = ""; // xml string from a gpx file.

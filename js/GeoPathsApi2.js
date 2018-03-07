@@ -107,7 +107,7 @@ function wigo_ws_GeoPathsRESTfulApi() {
             onDownloadRecordStatsList = onDone;
         else
             onDownloadRecordStatsList = function (bOk, arStats, sStatus) { };
-        // $$$$Fix var bOk = base.Get(eState.GpxGetListByLatLon, sGpxGetListByLatLonUri(sOwnerId, nShare, gptSW, gptNE, ah));
+        var bOk = base.Get(eState.DownloadRecordStatsList, sDownloadRecordStatsListUri(sOwnerId, ah));
         return bOk;
     };
 
@@ -132,7 +132,7 @@ function wigo_ws_GeoPathsRESTfulApi() {
             onUploadRecordStatsList = onDone;
         else
             onUploadRecordStatsList = function (bOk, sStatus) { };
-        var bOk = base.Post(eState.UploadRecordStatsList, sUploadRecordStatsListUri(sOwnerId, ah, arStats));
+        var bOk = base.Post(eState.UploadRecordStatsList, sUploadRecordStatsListUri(sOwnerId, ah), arStats);
         return bOk;
     };
 
@@ -346,6 +346,15 @@ function wigo_ws_GeoPathsRESTfulApi() {
         return s;
     }
 
+    // Returns relative URI for DownloadRecordStatsList api.
+    // Args:
+    //  sOwnerId: string. owner id for stats.
+    //  ah: string: access handle for server authentication verification.
+    function sDownloadRecordStatsListUri(sOwnerId, ah) {
+        var s = "downloadrecordstatslist/{0}?ah={1}".format(sOwnerId, ah);
+        return s;
+    }
+
     // ** Async completion event handlers
     // Note: Initialized to empty handlers.
     //       Caller of api method (GpxPut, GpxGetList, etc.) provides the 
@@ -518,7 +527,26 @@ function wigo_ws_GeoPathsRESTfulApi() {
                     sStatus = "UploadRecordStatsList succeeded."
                 else
                     sStatus = base.FormCompletionStatus(req);
-                onUploadRecordStatsList(bOk, status);
+                onUploadRecordStatsList(bOk, sStatus);
+                break;
+            case eState.DownloadRecordStatsList: ////20180306 added
+                var arStats;
+                if (bOk) {
+                    if (req && req.readyState == 4 && req.status === 200) {
+                        arStats = JSON.parse(req.responseText);
+                        sStatus = "DownloadRecordStatsList succeeded.";
+                    } else {
+                        arStats = [];
+                        sStatus = "Invalid response received for DownloadRecordStatsList."
+                    }
+                } else {
+                    sStatus = base.FormCompletionStatus(req);
+                    arStats = [];
+                    if (req && req.readyState == 4 && req.status === 403) {
+                        sStatus = "Authentication failed. Sign In again because authorization has probably expired.";
+                    }
+                }
+                onDownloadRecordStatsList(bOk, arStats, sStatus)
                 break;
         }
     };
@@ -862,7 +890,7 @@ wigo_ws_GpxPath.AttachFcns = function (me) {
 // Object for exchanging with server statistics for a trail that has been recorded. 
 // Note: Also used by Model2.js to save to localStorage.
 function wigo_ws_GeoTrailRecordStats() {
-    this.nId = 0; // interger. database sequence number at server. 0 indicates new. 
+    ////20180306 this.nId = 0; // interger. database sequence number at server. 0 indicates new. 
     this.nTimeStamp = 0; // integer. Time value of javascript Date object as an integer. Creation timesamp.
     this.msRunTime = 0;  // number. Run time for the recorded path in milliseconds.
     this.mDistance = 0;  // number. Distance of path in meters.

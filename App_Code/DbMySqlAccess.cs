@@ -458,6 +458,7 @@ public class DbMySqlAccess : IDbAccess
 
     /// <summary>
     /// Stores list of GeoTrailRecordStats object in database.
+    /// Returns result of database access.
     /// </summary>
     /// <param name="sOwnerId">Owner id to identify to whom the stats belong.</param>
     /// <param name="statsList">List of stats objects to store in database.</param>
@@ -521,6 +522,46 @@ public class DbMySqlAccess : IDbAccess
         return result;
     }
 
+    /// <summary>
+    /// Gets a list of GeoTrailRecordStats objects found in database.
+    /// Returns result of of database access.
+    /// </summary>
+    /// <param name="sOwnerId">Id of owner of Gpx records in database.
+    /// If null, any owner record is valid to included.</param>
+    /// <param name="list">Ref to list [out] that is filled from database.</param>
+    /// <returns></returns>
+    public DbResult DownloadRecordStatsList(string sOwnerId, GeoTrailRecordStatsList list) ////20180306 added
+    {
+        DbResult result = new DbResult();
+        // Ensure output list is empty before filling it.
+        list.Clear();
+
+        if (conn == null)
+        {
+            SetError(result, DbResult.EResult.CONNECTION_INACTIVE);
+        }
+        else
+        {
+            // Find list of record in database.
+            RecordStatsRec rec = new RecordStatsRec();
+            List<MySqlTableAccess> liFound = new List<MySqlTableAccess>();
+            string sExpr = String.Format("sOwnerId = '{0}'", sOwnerId);
+            MySqlTableAccess.EOpResult opResult = rec.SelectByExpr(conn, sExpr, liFound);
+            // Fill list of GeoTrailRecordStats elements to return.
+            foreach (MySqlTableAccess recFound in liFound)
+            {
+                RecordStatsRec elFound = recFound as RecordStatsRec; // Element to add to output list.
+                if (elFound == null)
+                {
+                    // Cast failed. Should not happen, code error.
+                    result.SetError(DbResult.EResult.ERROR, "RecordStatsRec in database cast incorrectly.");
+                    break;
+                }
+                list.Add(elFound.ToStatsObj()); 
+            }
+        }
+        return result;
+    }
 
     // ** Other Members 
     protected MySqlConnection conn = null; // Active connection to mysql database.
@@ -1385,7 +1426,7 @@ public class RecordStatsRec : MySqlTableAccess
     /// <remarks>GeoTrailRecordStats is exchanged with server as json.</remarks>
     public void Set(string sOwnerId, GeoTrailRecordStats stats) {
         this.sOwnerId = sOwnerId;
-        this.nId = stats.nId;
+        ////20180306 this.nId = stats.nId;
         this.nTimeStamp = stats.nTimeStamp;
         this.msRunTime = stats.msRunTime;
         this.mDistance = stats.mDistance;
@@ -1400,7 +1441,7 @@ public class RecordStatsRec : MySqlTableAccess
     /// <returns></returns>
     public bool IsSame(GeoTrailRecordStats stats)
     {
-        bool bSame = this.nId == stats.nId &&
+        bool bSame = ////20180306 this.nId == stats.nId &&
                      this.nTimeStamp == stats.nTimeStamp &&
                      this.msRunTime == stats.msRunTime &&
                      this.mDistance == stats.mDistance &&
@@ -1426,7 +1467,7 @@ public class RecordStatsRec : MySqlTableAccess
     {
         bool bError = false;
         List<MySqlTableAccess> liResult = new List<MySqlTableAccess>();
-        string sExpr = String.Format("sOwnerId = '{0}' and nTimeStamp = '{1}'", sOwnerId);
+        string sExpr = String.Format("sOwnerId = '{0}' and nTimeStamp = '{1}'", sOwnerId, nTimeStamp);
         EOpResult result = this.SelectByExpr(conn, sExpr, liResult);
         if (result == EOpResult.SUCEEDED && liResult.Count > 0)
         {
@@ -1449,6 +1490,21 @@ public class RecordStatsRec : MySqlTableAccess
             Init(); // Initialize this record on error.
         }
         return result;
+    }
+
+    /// <summary>
+    /// Returns a new GeoTrailRecordStats object formed from this record.
+    /// </summary>
+    /// <returns></returns>
+    public GeoTrailRecordStats ToStatsObj()  ////20180306 added 
+    {
+        GeoTrailRecordStats stats = new GeoTrailRecordStats();
+        stats.nTimeStamp = this.nTimeStamp;
+        stats.mDistance = this.mDistance;
+        stats.msRunTime = this.msRunTime;
+        stats.caloriesKinetic = this.caloriesKinetic;
+        stats.caloriesBurnedCalc = this.caloriesBurnedCalc;
+        return stats;
     }
 
     // ** Private Members

@@ -194,17 +194,17 @@ function wigo_ws_Model(deviceDetails) {
     //      bOk: boolean: true for sucessful upload.
     //      sStatus: string: description for the upload result.
     //      Returns: void
-    //  Synchronous return: boolean. true indicates download successfully started.
+    //  Synchronous return: boolean. true indicates upload successfully started.
     // Remarks: User must be signed in. If user is not signed in, calls onDone(..) 
     // immediately indicating user is not signed in and returns true indicating
-    // transfer started (although it fails immediately).
-    // indicating user is not signed in.
+    // transfer started (although it fails immediately) because
+    // user is not signed in.
     this.uploadRecordStatsList = function (arStats, onDone) { 
         var ah = this.getAccessHandle();
         var id = this.getOwnerId();
         var bStarted = false;
         if (ah.length > 0 && id.length > 0) {
-            bStarted = api.uploadRecordStatsList(id, ah, arStats, onDone);
+            bStarted = api.UploadRecordStatsList(id, ah, arStats, onDone);
         } else {
             // Can not upload because user id is invalid. Indicate synchronous start, but callback with error.
             bStarted = true;
@@ -214,6 +214,35 @@ function wigo_ws_Model(deviceDetails) {
         }
         return bStarted;
     };
+
+    // Downloads recorded stats list from server.
+    // Args:
+    //  onDone: Asynchronous completion handler. Signature:
+    //      bOk: boolean: true for sucessful upload.
+    //      arStats: array of wigo_ws_GeoTrailRecordStats objs. the list that has been downloaded.
+    //      sStatus: string: description for the upload result.
+    //      Returns: void
+    //  Synchronous return: boolean. true indicates download successfully started.
+    // Remarks: User must be signed in. If user is not signed in, calls onDone(..) 
+    // immediately indicating user is not signed in and returns true indicating
+    // transfer started (although it fails immediately) because
+    // user is not signed in.
+    this.downloadRecordStatsList = function (onDone) { ////20180306 added
+        var ah = this.getAccessHandle();
+        var id = this.getOwnerId();
+        var bStarted = false;
+        if (ah.length > 0 && id.length > 0) {
+            bStarted = api.DownloadRecordStatsList(id, ah, onDone);
+        } else {
+            // Can not upload because user id is invalid. Indicate synchronous start, but callback with error.
+            bStarted = true;
+            if (onDone) {
+                onDone(false, [], "User must be signed in.");
+            }
+        }
+        return bStarted;
+
+    }
 
     // Resets flag that indicates http request (get or post) is still in progress.
     // Note: May be needed if trying to issue subsequent requests fails due to 
@@ -456,7 +485,7 @@ function wigo_ws_Model(deviceDetails) {
     };
 
     // Returns list of record stats objects, which is
-    // Array oibjec of wigo_ws_GeoTrailRecordStats objects.
+    // Array object of wigo_ws_GeoTrailRecordStats objects.
     this.getRecordStatsList = function() { 
         return arRecordStats.getAll();
     };
@@ -556,7 +585,6 @@ function wigo_ws_Model(deviceDetails) {
         }
         return bOk;
     }
-
 
     // Object for storing Offline Parameters for geo paths in local storage.
     // Manages an array of wigo_ws_GeoPathMap.OfflineParams objects.
