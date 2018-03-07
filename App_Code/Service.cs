@@ -778,19 +778,6 @@ public class AuthResult
 [DataContract]
 public class GeoTrailRecordStats
 {
-    /* ////20180306 remove. database sequence id not exchanged between server and client.
-    /// <summary>
-    /// Database sequence number at server. 0 indicates new.
-    /// </summary>
-    [DataMember]
-    public int nId
-    {
-        get { return _nId;}
-        set { _nId = value;}
-    }
-    int _nId = 0;
-    */
-
     /// <summary>
     /// Time value of javascript Date object as an integer. Creation timesamp.
     [DataMember]

@@ -644,7 +644,7 @@ function wigo_ws_View() {
 
         // **** Add event handlers for Stats tab.
         // Download stats list from server.
-        $('#buDownloadStatsList').bind('click', function (e) { ////20180306 added
+        $('#buDownloadStatsList').bind('click', function (e) { 
             var bStarted = view.onDownloadRecordStatsList(nMode, DownloadStatsListCompleted);
             if (!bStarted)
                 alert("Downloading RecordStatsList failed to start.");
@@ -717,13 +717,7 @@ function wigo_ws_View() {
                 arStats.push(stats);
             }
 
-            ////20180307 Refactor this snippet as FormStatsSelectOption(stats)(selectStatsItem, arStats)
-            // Form the new option.
-            var dateTimeStamp = new Date(stats.nTimeStamp);
-            var sDate = dateTimeStamp.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            var newOption = new Option(sDate, stats.nTimeStamp, true, true);
-            newOption.setAttribute('data-msDate', stats.nTimeStamp.toFixed(0));
-            ////20180307 end refactor snippet.
+            var newOption = FormStatsSelectOption(stats);
 
             if (selectStatsItem.length < 1) {
                 // selection list is empty, append a prompt.
@@ -747,7 +741,7 @@ function wigo_ws_View() {
         // Arg:
         //  stats: wigo_ws_GeoTrailRecordStats obj. stats.nTimesTamp is used to the option.
         // Returns: new Option element for a HTML Select element.
-        function FormStatsSelectOption(stats) { ////20180307 refactor 
+        function FormStatsSelectOption(stats) { 
             // Form the new option.
             var dateTimeStamp = new Date(stats.nTimeStamp);
             var sDate = dateTimeStamp.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -811,7 +805,7 @@ function wigo_ws_View() {
             }
         }
 
-        function DownloadStatsListCompleted(bOk, arDownloadedStats, sStatus) {  ////20180306 added
+        function DownloadStatsListCompleted(bOk, arDownloadedStats, sStatus) {  
             if (bOk) {
                 // clear the selectStatsItem and selecStatDeletion controls and associated stats data arrays.
                 ClearSelectCtrl(selectStatsItem, arStats);
@@ -840,7 +834,7 @@ function wigo_ws_View() {
         // Args:
         //  selectCtrl: ref to HTML Select Element. the select control.
         //  arStats: ref to array of wigo_ws_GeoTrailRecordStats obj. the associated stats data objects.
-        function ClearSelectCtrl(selectCtrl, arStats) { ////20180307 added
+        function ClearSelectCtrl(selectCtrl, arStats) { 
             // Remove all the option elements from selectCtrl, except item(0) which is a prompt.
             for (var i = 1; i < selectCtrl.length; i++) {
                 selectCtrl.remove(i);
@@ -1552,7 +1546,7 @@ function wigo_ws_Controller() {
     //      sStatus: string. description for the download result.
     //      Return: void
     //  Synchronous return: boolean. true indicates upload successfully started.
-    view.onDownloadRecordStatsList = function (nMode, onDone) {////20180306 added
+    view.onDownloadRecordStatsList = function (nMode, onDone) {
         var bStarted = model.downloadRecordStatsList(onDone);
         return bStarted;
     }

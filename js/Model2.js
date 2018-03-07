@@ -227,7 +227,7 @@ function wigo_ws_Model(deviceDetails) {
     // immediately indicating user is not signed in and returns true indicating
     // transfer started (although it fails immediately) because
     // user is not signed in.
-    this.downloadRecordStatsList = function (onDone) { ////20180306 added
+    this.downloadRecordStatsList = function (onDone) { 
         var ah = this.getAccessHandle();
         var id = this.getOwnerId();
         var bStarted = false;

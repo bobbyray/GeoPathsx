@@ -125,5 +125,5 @@ public interface IDbAccess
     /// If null, any owner record is valid to included.</param>
     /// <param name="list">Ref to list [out] that is filled from database.</param>
     /// <returns></returns>
-    DbResult DownloadRecordStatsList(string sOwnerId, GeoTrailRecordStatsList list);  ////20180306 added
+    DbResult DownloadRecordStatsList(string sOwnerId, GeoTrailRecordStatsList list);  
 }

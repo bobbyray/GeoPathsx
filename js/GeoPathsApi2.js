@@ -529,7 +529,7 @@ function wigo_ws_GeoPathsRESTfulApi() {
                     sStatus = base.FormCompletionStatus(req);
                 onUploadRecordStatsList(bOk, sStatus);
                 break;
-            case eState.DownloadRecordStatsList: ////20180306 added
+            case eState.DownloadRecordStatsList: 
                 var arStats;
                 if (bOk) {
                     if (req && req.readyState == 4 && req.status === 200) {
@@ -890,7 +890,6 @@ wigo_ws_GpxPath.AttachFcns = function (me) {
 // Object for exchanging with server statistics for a trail that has been recorded. 
 // Note: Also used by Model2.js to save to localStorage.
 function wigo_ws_GeoTrailRecordStats() {
-    ////20180306 this.nId = 0; // interger. database sequence number at server. 0 indicates new. 
     this.nTimeStamp = 0; // integer. Time value of javascript Date object as an integer. Creation timesamp.
     this.msRunTime = 0;  // number. Run time for the recorded path in milliseconds.
     this.mDistance = 0;  // number. Distance of path in meters.

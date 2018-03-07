@@ -530,7 +530,7 @@ public class DbMySqlAccess : IDbAccess
     /// If null, any owner record is valid to included.</param>
     /// <param name="list">Ref to list [out] that is filled from database.</param>
     /// <returns></returns>
-    public DbResult DownloadRecordStatsList(string sOwnerId, GeoTrailRecordStatsList list) ////20180306 added
+    public DbResult DownloadRecordStatsList(string sOwnerId, GeoTrailRecordStatsList list) 
     {
         DbResult result = new DbResult();
         // Ensure output list is empty before filling it.
@@ -1426,7 +1426,6 @@ public class RecordStatsRec : MySqlTableAccess
     /// <remarks>GeoTrailRecordStats is exchanged with server as json.</remarks>
     public void Set(string sOwnerId, GeoTrailRecordStats stats) {
         this.sOwnerId = sOwnerId;
-        ////20180306 this.nId = stats.nId;
         this.nTimeStamp = stats.nTimeStamp;
         this.msRunTime = stats.msRunTime;
         this.mDistance = stats.mDistance;
@@ -1441,8 +1440,7 @@ public class RecordStatsRec : MySqlTableAccess
     /// <returns></returns>
     public bool IsSame(GeoTrailRecordStats stats)
     {
-        bool bSame = ////20180306 this.nId == stats.nId &&
-                     this.nTimeStamp == stats.nTimeStamp &&
+        bool bSame = this.nTimeStamp == stats.nTimeStamp &&
                      this.msRunTime == stats.msRunTime &&
                      this.mDistance == stats.mDistance &&
                      this.caloriesKinetic == stats.caloriesKinetic &&
@@ -1496,7 +1494,7 @@ public class RecordStatsRec : MySqlTableAccess
     /// Returns a new GeoTrailRecordStats object formed from this record.
     /// </summary>
     /// <returns></returns>
-    public GeoTrailRecordStats ToStatsObj()  ////20180306 added 
+    public GeoTrailRecordStats ToStatsObj()  
     {
         GeoTrailRecordStats stats = new GeoTrailRecordStats();
         stats.nTimeStamp = this.nTimeStamp;
