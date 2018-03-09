@@ -35,7 +35,6 @@ function wigo_ws_View() {
     //      no item selected.
     this.onDelete = function (nMode, ixPathArray) { };
 
-
     // Get list of paths from server.
     // Handler Signature:
     //  nMode: byte value of this.eMode enumeration.
@@ -76,6 +75,17 @@ function wigo_ws_View() {
     //      Returns: void
     //  Synchronous return: boolean. true indicates upload successfully started.
     this.onUploadRecordStatsList = function (nMode, arStats, onDone) { return false;};
+
+    // Deletes at web server a list of record stats items.
+    // Arg:
+    //  nMode: byte value of this.eMode enumeration.
+    //  arTimeStamp: array of wigo_ws_GeoTrailTimeStamp objs. timestamps identifying wigo_ws_GeoTrailRecordStats objs to delete.
+    //  onDone: callback after async completion, signature:
+    //      bOk: boolean: true for sucessful delete.
+    //      sStatus: string: description for the delete result.
+    //      Returns: void
+    //  Synchronous return: boolean. true indicates delete successfully started.
+    this.onDeleteRecordStatsList = function (nMode, arTimeStamp, onDone) { return false; }; ////20180307 added
 
     // Downloads from web server a list of all the record stats items.
     // Args:
@@ -647,7 +657,9 @@ function wigo_ws_View() {
         $('#buDownloadStatsList').bind('click', function (e) { 
             var bStarted = view.onDownloadRecordStatsList(nMode, DownloadStatsListCompleted);
             if (!bStarted)
-                alert("Downloading RecordStatsList failed to start.");
+                view.ShowStatus("Downloading stats items failed to start.");
+            else
+                view.ShowStatus("Downloading stats items from server.", false);
         });
 
         // Upload stats list to server.
@@ -656,23 +668,49 @@ function wigo_ws_View() {
             if (arStats.length > 0) {
                 bStarted = view.onUploadRecordStatsList(nMode, arStats, UploadStatsListCompleted);
                 if (!bStarted)
-                    alert('Uploading RecordStatsList failed to start.')
+                    view.ShowStatus('Uploading stats items failed to start.');
+                else
+                    view.ShowStatus('Uploading stats items to server.', false);
             } else {
-                alert("There are no stats items to upload.");
+                view.ShowStatus("There are no stats items to upload.");
             }
         });
 
-        // Delete stats list at server.
-        $('#buDeleteStatsList').bind('click', function (e) {
+        // Delete stats list from server.
+        $('#buDeleteStatsList').bind('click', function (e) { ////20180307 added
+            var bStarted = false;
+            if (arDeleteStats.length > 0) {
+                ////20180307$$$$ fix
+                var timeStamp;
+                var arTimeStamp = [];
+                for (var i = 0; i < arDeleteStats.length; i++) {
+                    timeStamp = new wigo_ws_GeoTrailTimeStamp(arDeleteStats[i].nTimeStamp)
+                    arTimeStamp.push(timeStamp);
+                }
+                bStarted = view.onDeleteRecordStatsList(nMode, arTimeStamp, DeleteStatsListCompleted);
+                if (!bStarted)
+                    view.ShowStatus('Deleting RecordStatsList failed to start.');
+                else
+                    view.ShowStatus("Deleting stats items at server.", false);
+            } else {
+                view.ShowStatus("There are no stats items to delete.");
+            }
         });
+
+        ////20180308 // Delete stats list at server.
+        ////20180308 $('#buDeleteStatsList').bind('click', function (e) {
+        ////20180308 });
 
         // Clear stats item.
         $('#buNewStatsItem').bind('click', function (e) {
             var stats = new wigo_ws_GeoTrailRecordStats();
             stats.nTimeStamp = Date.now();
-            stats.msRunTime = (8 * 60 + 9) * 1000;
-            stats.mDistance = 961;
+            stats.msRunTime = 1000; ////20180308 (8 * 60 + 9) * 1000;
+            stats.mDistance = 1; ////20180308 961;
             SetStatsItemCtrls(stats);
+            selectStatsItem.selectedIndex = 0;            ////20180308 added
+            selectStatsDeletionItem.selectedIndex = 0;    ////20180303 added 
+            view.ClearStatus(); ////20180309 added
         });
 
         // Adds a new stats item or replaces an existing one based
@@ -682,6 +720,11 @@ function wigo_ws_View() {
             var stats = SetStatsItemList(selectStatsItem, arStats);
             if (stats)
                 RemoveFromStatsItemList(selectStatsDeletionItem, arDeleteStats, stats.nTimeStamp);
+            selectStatsDeletionItem.selectedIndex = 0; ////20180308 added
+            if (stats)  ////20180309 add clearing or showing status.
+                view.ClearStatus(); ////20180309 added
+            else
+                view.ShowStatus('Stats item input is invalid.');
         });
 
         // Deletes a stats item in the deletion list (or replaces an existing one) based
@@ -691,7 +734,13 @@ function wigo_ws_View() {
             var stats = SetStatsItemList(selectStatsDeletionItem, arDeleteStats);
             if (stats)
                 RemoveFromStatsItemList(selectStatsItem, arStats, stats.nTimeStamp);
+            selectStatsItem.selectedIndex = 0; ////20180308 added 
+            if (stats)  ////20180309 add clearing or showing status.
+                view.ClearStatus(); ////20180309 added
+            else
+                view.ShowStatus('Stats item input is invalid.');
         });
+
 
         // Adds a new stats item or replaces an existing one based
         // on values in the stats item controls (fields).
@@ -705,7 +754,7 @@ function wigo_ws_View() {
             var stats = GetStatsItemCtrls();
             // Quit is timestamp is invalid.
             if (Number.isNaN(stats.nTimeStamp)) {
-                alert("Timestamp is invalid. Enter Stats Item fields.");
+                view.ShowStatus("Timestamp is invalid. Enter Stats Item fields.");
                 return null;
             }
             // Replace existing stats obj in arStats or add new obj if not in array.
@@ -774,11 +823,13 @@ function wigo_ws_View() {
         // Sets the stats item controls for the item selected in the selection list.
         jqselectStatsItem.bind('click',function(e){
             SetStatsItemCtrlsFromSelected(selectStatsItem, arStats);
+            selectStatsDeletionItem.selectedIndex = 0; // Deselect Deletions dropdown. ////20180309 
         });
 
         // Sets the stats item controls for the item selected in the deletion list.
         jqselectStatsDeletionItem.bind('click', function (e) {
             SetStatsItemCtrlsFromSelected(selectStatsDeletionItem, arDeleteStats);
+            selectStatsItem.selectedIndex = 0; // Deselect the upload dropdown.
         });
 
         // Sets the stats item controls for the selected item in a select control.
@@ -793,6 +844,8 @@ function wigo_ws_View() {
                 if (stats) {
                     SetStatsItemCtrls(stats);
                 }
+            } else { ////20180309 added else and body
+                ClearStatsItemCtrls();
             }
         }
 
@@ -801,7 +854,17 @@ function wigo_ws_View() {
             if (bOk) {
                 view.ShowStatus("Successfully uploaded Stats List.", false);
             } else {
-                view.ShowStatus("Upoad of Stats List failed: " + sStatus);
+                view.ShowStatus("Upload of Stats List failed: " + sStatus);
+            }
+        }
+
+        function DeleteStatsListCompleted(bOk, sStatus) { ////20180307 added  x
+            if (bOk) {
+                // Set stats item fields based on selection in selectStatsItem droplist.
+                SetStatsItemCtrlsFromUploadDropDown(); 
+                view.ShowStatus("Successfully deleted Stats List at server.", false);
+            } else {
+                view.ShowStatus("Deletion of Stats List failed: " + sStatus);
             }
         }
 
@@ -817,7 +880,19 @@ function wigo_ws_View() {
                     selectStatsItem.add(option);
                     arStats.push(arDownloadedStats[i])
                 }
-                var sMsg = "Successfully download {0} stats items.".format(arDownloadedStats.length);
+                /* ////20180308 refactor
+                if (selectStatsItem.selectedIndex < 1) { ////20180308$$$$ fix added 
+                    // No items selected in droplist, so clear the stats items controls (user input fields).
+                    ClearStatsItemCtrls();
+                } else {
+                    // Set stats item controls (user input fields) for selected stats item in droplist.
+                    var msTimeStamp = Number.parseInt(selectStatsItem.item(selectStatsItem.selectedIndex).getAttribute('data-msdate'), 10);
+                    var stats = FindStatsObj(arStats, msTimeStamp);
+                    SetStatsItemCtrls(stats);
+                }
+                */
+                SetStatsItemCtrlsFromUploadDropDown();
+                var sMsg = "Successfully downloaded {0} stats items.".format(arDownloadedStats.length);
                 view.ShowStatus(sMsg, false);
             } else {
                 view.ShowStatus("Download of stats failed: " + sStatus);
@@ -830,14 +905,17 @@ function wigo_ws_View() {
         var arStats = [];        // Stats items to uploading/downloading.
         var arDeleteStats = [];  // Stats items for deletion when uploading. 
 
+
+
         // Clears a html select control and its associated stats data array.
         // Args:
         //  selectCtrl: ref to HTML Select Element. the select control.
         //  arStats: ref to array of wigo_ws_GeoTrailRecordStats obj. the associated stats data objects.
         function ClearSelectCtrl(selectCtrl, arStats) { 
             // Remove all the option elements from selectCtrl, except item(0) which is a prompt.
-            for (var i = 1; i < selectCtrl.length; i++) {
-                selectCtrl.remove(i);
+            var nOptionCount = selectCtrl.length;
+            for (var i = 1; i < nOptionCount; i++) {
+                selectCtrl.remove(1); // Always remove element at index 1 until there is only element 0 left. 
             }
             // Remove all elements in the associated data array of stats objects.
             arStats.splice(0,arStats.length)
@@ -1008,6 +1086,38 @@ function wigo_ws_View() {
             stats.caloriesKinetic = jqstatsCaloriesKinetic.val();
             stats.caloriesBurnedCalc = jqstatsCaloriesBurnedCalc.val();
             return stats;
+        }
+
+        // Sets the stats item ctrls (user input field) from the selected option
+        // in the selectStatsItem dropdown list.
+        // Also sets the selectStatsDeletionItem drop to option 0, the prompt.
+        function SetStatsItemCtrlsFromUploadDropDown() { ////20180308 added 
+            /* ////20180309 used shared code.
+            if (selectStatsItem.selectedIndex < 1) { 
+                // No items selected in droplist, so clear the stats items controls (user input fields).
+                ClearStatsItemCtrls();
+            } else {
+                // Set stats item controls (user input fields) for selected stats item in droplist.
+                var msTimeStamp = Number.parseInt(selectStatsItem.item(selectStatsItem.selectedIndex).getAttribute('data-msdate'), 10);
+                var stats = FindStatsObj(arStats, msTimeStamp);
+                SetStatsItemCtrls(stats);
+            }
+            */
+            SetStatsItemCtrlsFromSelected(selectStatsItem, arStats); ////20180309 Use shared code.
+            // Ensure prompt is selected for the deletions droplist since an option in it should not be selected.
+            selectStatsDeletionItem.selectedIndex = 0;
+        }
+
+
+
+        // Clears the user input for the stats item control.
+        function ClearStatsItemCtrls() { ////20180308 added.
+            jqstatsTimeStamp.val("");
+            jqstatsRunTimeMins.val(""); 
+            jqstatsRunTimeSecs.val("")
+            jqstatsDistance.val("");
+            jqstatsCaloriesKinetic.val("");
+            jqstatsCaloriesBurnedCalc.val("");
         }
     }
     var statsUIMgr = new StatsUIMgr(this);
@@ -1537,6 +1647,20 @@ function wigo_ws_Controller() {
         return bStarted;
     };
 
+    // Deletes at web server a list of record stats items.
+    // Arg:
+    //  nMode: byte value of this.eMode enumeration.
+    //  arTimeStamp: array of wigo_ws_GeoTrailTimeStamp objs. timestamps identifying wigo_ws_GeoTrailRecordStats objs to delete.
+    //  onDone: callback after async completion, signature:
+    //      bOk: boolean: true for sucessful delete.
+    //      sStatus: string: description for the delete result.
+    //      Returns: void
+    //  Synchronous return: boolean. true indicates delete successfully started.
+    view.onDeleteRecordStatsList = function (nMode, arTimeStamp, onDone) {  ////20180307 added
+        var bStarted = model.deleteRecordStatsList(arTimeStamp, onDone)
+        return bStarted;
+    };
+
     // Downloads from web server a list of all the record stats items.
     // Args:
     //  nMode: byte value of this.eMode enumeration.
@@ -1550,7 +1674,6 @@ function wigo_ws_Controller() {
         var bStarted = model.downloadRecordStatsList(onDone);
         return bStarted;
     }
-
 
     // ** Private members
     var xmlGpx = ""; // xml string from a gpx file.

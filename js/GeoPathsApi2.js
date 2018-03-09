@@ -123,7 +123,7 @@ function wigo_ws_GeoPathsRESTfulApi() {
     //      sStatus: string: description for the upload result.
     //      Returns: void
     //  Synchronous return: boolean. true indicates download successfully started.
-    // Remarks: If a database record is exists and is exactly the same as the arStats element,
+    // Remarks: If a database record already exists and is exactly the same as the arStats element,
     // the database is not written, only read.
     // If the arStats element does not exist in the database, it is inserted.
     this.UploadRecordStatsList = function (sOwnerId, ah, arStats, onDone) {  
@@ -135,6 +135,27 @@ function wigo_ws_GeoPathsRESTfulApi() {
         var bOk = base.Post(eState.UploadRecordStatsList, sUploadRecordStatsListUri(sOwnerId, ah), arStats);
         return bOk;
     };
+
+    // Deletes at web server a list of record stats items.
+    // Arg:
+    //  sOwnerId: string for owner id.
+    //  ah: string for access handler for verification of owner.
+    //  arTimeStamp: ref to array of wigo_ws_GeoTrailTimeStamp objs. the list of timestamps identifying the record stats to delete.
+    //  onDone: Asynchronous completion handler. Signature:
+    //      bOk: boolean: true for sucessful deletion.
+    //      sStatus: string: description for the deletion result.
+    //      Returns: void
+    //  Synchronous return: boolean. true indicates delete successfully started.
+    // Remarks: It is not an error if a database record does not exist for an arStats element.
+    this.DeleteRecordStatsList = function (sOwnerId, ah, arTimeStamp, onDone) { ////20180307 added
+        // Save async completion handler.
+        if (typeof (onDone) === 'function')
+            onDeleteRecordStatsList = onDone;
+        else
+            onDeleteRecordStatsList = function (bOk, sStatus) { };
+        var bOk = base.Post(eState.DeleteRecordStatsList, sDeleteRecordStatsListUri(sOwnerId, ah), arTimeStamp);
+        return bOk;
+    }
 
     // Authenticates user with the server.
     // Args 
@@ -225,7 +246,7 @@ function wigo_ws_GeoPathsRESTfulApi() {
 
     // Enumeration for api transfer state. 
     var eState = { Initial: 0, GpxPut: 1, GpxGetList: 2, Authenticate: 3, Logout: 4, GpxDelete: 5, GpxGetListByLatLon: 6, 
-                   DownloadRecordStatsList: 7, UploadRecordStatsList: 8}; 
+                   DownloadRecordStatsList: 7, UploadRecordStatsList: 8, DeleteRecordStatsList: 9}; 
 
     // Enumeration for login status return by OAuth server.
     // Note: same values as for FacebookAuthentication.eAuthResult (keep synced).
@@ -346,6 +367,15 @@ function wigo_ws_GeoPathsRESTfulApi() {
         return s;
     }
 
+    // Returns relative URI for DeleteRecordStatsList api.
+    // Args:
+    //  sOwnerId: string. owner id for stats.
+    //  ah: string: access handle for server authentication verification.
+    function sDeleteRecordStatsListUri(sOwnerId, ah) {  ////20180307
+        var s = "deleterecordstatslist/{0}?ah={1}".format(sOwnerId, ah);
+        return s;
+    }
+
     // Returns relative URI for DownloadRecordStatsList api.
     // Args:
     //  sOwnerId: string. owner id for stats.
@@ -411,6 +441,12 @@ function wigo_ws_GeoPathsRESTfulApi() {
     //      Returns: void
     var onUploadRecordStatsList = function (bOk, sStatus) { };
 
+    // DeleteRecordStatsList has completed asynchronously.
+    // Handler Signature:
+    //      bOk: boolean: true for sucessful delete at server.
+    //      sStatus: string: description for the delete result.
+    //      Returns: void
+    var onDeleteRecordStatsList = function (bOk, sStatus) { };
 
     // Authentication has completed.
     // Handler signature:
@@ -528,6 +564,13 @@ function wigo_ws_GeoPathsRESTfulApi() {
                 else
                     sStatus = base.FormCompletionStatus(req);
                 onUploadRecordStatsList(bOk, sStatus);
+                break;
+            case eState.DeleteRecordStatsList:  ////20180307
+                if (bOk)
+                    sStatus = "DeleteRecordStatsList succeeded";
+                else
+                    sStatus = base.FormCompletionStatus(req);
+                onDeleteRecordStatsList(bOk, sStatus);
                 break;
             case eState.DownloadRecordStatsList: 
                 var arStats;
@@ -896,6 +939,13 @@ function wigo_ws_GeoTrailRecordStats() {
     this.caloriesKinetic = 0;      // number. Kinetic engery in calories to move body mass along the path.
     this.caloriesBurnedCalc = 0;   // number. Calories burned calculated by the GeoTrail app.
     //20180215 this.caloriesBurnedActual = 0; // Removed. 
+}
+
+// Object for exchanging with server a timestamp.
+function wigo_ws_GeoTrailTimeStamp(nTimeStamp) {
+    this.nTimeStamp = 0; // integer for Date value in milliseconds.
+    if (typeof nTimeStamp === 'number')
+        this.nTimeStamp = nTimeStamp;
 }
 
 

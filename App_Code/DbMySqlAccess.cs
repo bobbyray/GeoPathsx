@@ -563,6 +563,52 @@ public class DbMySqlAccess : IDbAccess
         return result;
     }
 
+    /// <summary>
+    /// Deletes a list GeoTrailRecordStats object found in database.
+    /// Returns result of database access.
+    /// </summary>
+    /// <param name="sOwnerId">Id of owner of stats records</param>
+    /// <param name="timestampList">List of timestamps identifying stats records to delete.</param>
+    /// <returns></returns>
+    public DbResult DeleteRecordStatsList(string sOwnerId, GeoTrailTimeStampList timestampList)  ////20180307 added
+    {
+        DbResult result = new DbResult();
+        if (conn == null)
+        {
+            SetError(result, DbResult.EResult.CONNECTION_INACTIVE);
+        }
+        else
+        {
+            RecordStatsRec rec = new RecordStatsRec();
+            MySqlTableAccess.EOpResult opResult;
+            for (int i = 0; i < timestampList.Count; i++)
+            {
+                opResult = rec.SelectByTimeStamp(conn, sOwnerId, timestampList[i].nTimeStamp);
+                if (opResult == MySqlTableAccess.EOpResult.SUCEEDED)
+                {
+                    opResult = rec.Delete(conn);
+
+                    if (opResult != MySqlTableAccess.EOpResult.SUCEEDED)
+                    {
+                        result.SetError(DbResult.EResult.DELETE_FAILED);
+                        break; // Quit on error.
+                    }
+                }
+                else if (opResult == MySqlTableAccess.EOpResult.NOT_FOUND)
+                {
+                    ; // Ok, nothing to delete.
+                }
+                else
+                {
+                    result.SetError(DbResult.EResult.ERROR);
+                    break; // Quit on error.
+                }
+            }
+        }
+        return result;
+    }
+    
+
     // ** Other Members 
     protected MySqlConnection conn = null; // Active connection to mysql database.
 

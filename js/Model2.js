@@ -215,6 +215,34 @@ function wigo_ws_Model(deviceDetails) {
         return bStarted;
     };
 
+    // Deletes recorded stats list at server.
+    // Args:
+    //  arTimeStamp: ref to array of wigo_ws_GeoTrailTimeStamp objs. the list of timestamps identifying wigo_ws_GeoTrailRecordStats objs to delete. 
+    //  onDone: Asynchronous completion handler. Signature:
+    //      bOk: boolean: true for sucessful delete.
+    //      sStatus: string: description for the delete result.
+    //      Returns: void
+    //  Synchronous return: boolean. true indicates delete successfully started.
+    // Remarks: User must be signed in. If user is not signed in, calls onDone(..) 
+    // immediately indicating user is not signed in and returns true indicating
+    // transfer started (although it fails immediately) because
+    // user is not signed in.
+    this.deleteRecordStatsList = function (arTimeStamp, onDone) { ////20180307 added
+        var ah = this.getAccessHandle();
+        var id = this.getOwnerId();
+        var bStarted = false;
+        if (ah.length > 0 && id.length > 0) {
+            bStarted = api.DeleteRecordStatsList(id, ah, arTimeStamp, onDone);
+        } else {
+            // Can not delete at server because user id is invalid. Indicate synchronous start, but callback with error.
+            bStarted = true;
+            if (onDone) {
+                onDone(false, "User must be signed in.");
+            }
+        }
+        return bStarted;
+    };
+
     // Downloads recorded stats list from server.
     // Args:
     //  onDone: Asynchronous completion handler. Signature:

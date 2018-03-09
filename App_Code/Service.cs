@@ -290,7 +290,6 @@ public class Service
         return dbResult.sMsg;
     }
 
-
     /// <summary>
     /// Uploads a list of GeoTrailRecordStats elements to the database.
     /// </summary>
@@ -326,6 +325,46 @@ public class Service
 
         return result.sMsg;
     }
+
+
+
+    /// <summary>
+    /// Uploads a list of GeoTrailRecordStats elements to the database.
+    /// </summary>
+    /// <param name="sOwnerId">owner id of gpx records.</param>
+    /// <param name="sShare">Type of sharing with other owners allowed.</param>
+    /// <returns></returns>
+    /// <remarks>
+    /// The http request status code:
+    ///     200 for ok.
+    ///     403 for forbidden, authentication failed.
+    ///     500 for internal server error, database access error.
+    /// </remarks>
+    [OperationContract]
+    [WebInvoke(Method = "POST", RequestFormat = WebMessageFormat.Xml, ResponseFormat = WebMessageFormat.Json, UriTemplate = "deleterecordstatslist/{sOwnerId}?ah={accessHandle}")]
+    public string DeleteRecordStatsList(GeoTrailTimeStampList timestampList, string sOwnerId, string accessHandle)
+    {
+        IDbAccess acc = MyDbAccess.Get();
+        DoConnectionCallback oCode = delegate()
+        {
+            DbResult oResult = acc.ValidateAccess(sOwnerId, accessHandle);
+            if (oResult.bOk)
+            {
+                acc.DeleteRecordStatsList(sOwnerId, timestampList);
+            }
+            return oResult;
+        };
+        DbResult result = acc.DoConnection(oCode);
+
+        if (!result.bOk)
+        {
+            WebOperationContext.Current.OutgoingResponse.StatusCode = System.Net.HttpStatusCode.InternalServerError;
+        }
+
+        return result.sMsg;
+    }
+
+
 
 
 
@@ -834,6 +873,34 @@ public class GeoTrailRecordStats
     double _caloriesBurnedCalc = 0;
 }
 
+/// <summary>
+/// Timestamp for a GeoTrail Recorded Trail.
+/// </summary>
+[DataContract]
+public class GeoTrailTimeStamp
+{
+    /// <summary>
+    /// Time stamp in milliseconds for a data object.
+    /// </summary>
+    [DataMember]
+    public long nTimeStamp
+    {
+        get { return _nTimeStamp; }
+        set { _nTimeStamp = value; }
+    }
+    long _nTimeStamp = 0;
+}
+
+/// <summary>
+/// Json array for list of timestamps of GeoTrailRecordStats objects to be deleted 
+/// from server.
+/// </summary>
+[CollectionDataContract]
+public class GeoTrailTimeStampList : List<GeoTrailTimeStamp>
+{
+    public GeoTrailTimeStampList() {}
+    public GeoTrailTimeStampList(List<GeoTrailTimeStamp> list) : base(list) { }
+}
 
 /// <summary>
 /// Json array for list of Gpx elements.

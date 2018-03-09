@@ -119,11 +119,20 @@ public interface IDbAccess
 
     /// <summary>
     /// Gets a list of GeoTrailRecordStats objects found in database.
-    /// Returns result of of database access.
+    /// Returns result of database access.
     /// </summary>
     /// <param name="sOwnerId">Id of owner of Gpx records in database.
     /// If null, any owner record is valid to included.</param>
     /// <param name="list">Ref to list [out] that is filled from database.</param>
     /// <returns></returns>
-    DbResult DownloadRecordStatsList(string sOwnerId, GeoTrailRecordStatsList list);  
+    DbResult DownloadRecordStatsList(string sOwnerId, GeoTrailRecordStatsList list);
+
+    /// <summary>
+    /// Deletes a list GeoTrailRecordStats object found in database.
+    /// Returns result of database access.
+    /// </summary>
+    /// <param name="sOwnerId">Id of owner of stats records</param>
+    /// <param name="list">List of timestamps identifying stats records to delete.</param>
+    /// <returns></returns>
+    DbResult DeleteRecordStatsList(string sOwnerId, GeoTrailTimeStampList list);
 }
