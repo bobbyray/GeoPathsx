@@ -1,6 +1,6 @@
 'use strict';
 /* 
-Copyright (c) 2017 Robert R Schomburg
+Copyright (c) 2017 - 2018 Robert R Schomburg
 Licensed under terms of the MIT License, which is given at
 https://github.com/bobbyray/MitLicense/releases/tag/v1.0
 */
