@@ -309,3 +309,4 @@ Web.config
 Private/appSettings.config
 GeoPathsx.Local.sln
 *.exclude
+TestUser/testuser.txt
