@@ -1,5 +1,5 @@
 ﻿/* 
-Copyright (c) 2015, 2016 Robert R Schomburg
+Copyright (c) 2015, 2016, 2018 Robert R Schomburg
 Licensed under terms of the MIT License, which is given at
 https://github.com/bobbyray/MitLicense/releases/tag/v1.0
 */
@@ -147,7 +147,7 @@ function wigo_ws_GeoPathsRESTfulApi() {
     //      Returns: void
     //  Synchronous return: boolean. true indicates delete successfully started.
     // Remarks: It is not an error if a database record does not exist for an arStats element.
-    this.DeleteRecordStatsList = function (sOwnerId, ah, arTimeStamp, onDone) { ////20180307 added
+    this.DeleteRecordStatsList = function (sOwnerId, ah, arTimeStamp, onDone) { 
         // Save async completion handler.
         if (typeof (onDone) === 'function')
             onDeleteRecordStatsList = onDone;
@@ -371,7 +371,7 @@ function wigo_ws_GeoPathsRESTfulApi() {
     // Args:
     //  sOwnerId: string. owner id for stats.
     //  ah: string: access handle for server authentication verification.
-    function sDeleteRecordStatsListUri(sOwnerId, ah) {  ////20180307
+    function sDeleteRecordStatsListUri(sOwnerId, ah) {  
         var s = "deleterecordstatslist/{0}?ah={1}".format(sOwnerId, ah);
         return s;
     }
@@ -565,7 +565,7 @@ function wigo_ws_GeoPathsRESTfulApi() {
                     sStatus = base.FormCompletionStatus(req);
                 onUploadRecordStatsList(bOk, sStatus);
                 break;
-            case eState.DeleteRecordStatsList:  ////20180307
+            case eState.DeleteRecordStatsList:  
                 if (bOk)
                     sStatus = "DeleteRecordStatsList succeeded";
                 else

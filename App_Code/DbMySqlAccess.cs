@@ -1,5 +1,5 @@
 ﻿/* 
-Copyright (c) 2015 - 2017 Robert R Schomburg
+Copyright (c) 2015 - 2018 Robert R Schomburg
 Licensed under terms of the MIT License, which is given at
 https://github.com/bobbyray/MitLicense/releases/tag/v1.0
 */
@@ -570,7 +570,7 @@ public class DbMySqlAccess : IDbAccess
     /// <param name="sOwnerId">Id of owner of stats records</param>
     /// <param name="timestampList">List of timestamps identifying stats records to delete.</param>
     /// <returns></returns>
-    public DbResult DeleteRecordStatsList(string sOwnerId, GeoTrailTimeStampList timestampList)  ////20180307 added
+    public DbResult DeleteRecordStatsList(string sOwnerId, GeoTrailTimeStampList timestampList)  
     {
         DbResult result = new DbResult();
         if (conn == null)

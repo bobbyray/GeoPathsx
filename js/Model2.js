@@ -1,6 +1,6 @@
 ﻿'use strict';
 /* 
-Copyright (c) 2015, 2016 Robert R Schomburg
+Copyright (c) 2015 - 2018 Robert R Schomburg
 Licensed under terms of the MIT License, which is given at
 https://github.com/bobbyray/MitLicense/releases/tag/v1.0
 */
@@ -227,7 +227,7 @@ function wigo_ws_Model(deviceDetails) {
     // immediately indicating user is not signed in and returns true indicating
     // transfer started (although it fails immediately) because
     // user is not signed in.
-    this.deleteRecordStatsList = function (arTimeStamp, onDone) { ////20180307 added
+    this.deleteRecordStatsList = function (arTimeStamp, onDone) { 
         var ah = this.getAccessHandle();
         var id = this.getOwnerId();
         var bStarted = false;
