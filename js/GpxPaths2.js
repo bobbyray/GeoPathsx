@@ -361,6 +361,24 @@ function wigo_ws_View() {
         window.scrollTo(0, 0);
     };
 
+    // Appends a status messages starting on a new line to current status message and
+    // shows the full message.
+    // Arg:
+    //  sStatus: string of html to display.
+    //  bError: boolean, optional. Indicates an error msg. Default to true.
+    this.AppendStatusLine = function (sStatus, bError) {  
+        // If current statusDiv does not end with <br/>, append <br/>
+        var s = divStatus.innerHTML;
+        if (s.length > 0) {
+            // Replace <br/> ending a string.
+            s = s.replace(/<br\/*>\s*$/i, "")
+            s += '<br/>';
+        }
+        s += sStatus;
+
+        this.ShowStatus(s, bError);
+    };
+
     // Clears the status message.
     this.ClearStatus = function () {
         divStatus.innerHTML = "";
@@ -654,21 +672,23 @@ function wigo_ws_View() {
 
         // **** Add event handlers for Stats tab.
         // Download stats list from server.
-        $('#buDownloadStatsList').bind('click', function (e) { 
+        $('#buDownloadStatsList').bind('click', function (e) {
+            view.ClearStatus();   
             var bStarted = view.onDownloadRecordStatsList(nMode, DownloadStatsListCompleted);
             if (!bStarted)
-                view.ShowStatus("Downloading stats items failed to start.");
+                view.AppendStatusLine("Downloading stats items failed to start."); // AppendStatusLine() to status error shown by onDone. 
             else
                 view.ShowStatus("Downloading stats items from server.", false);
         });
 
         // Upload stats list to server.
         $('#buUploadStatsList').bind('click', function (e) {
+            view.ClearStatus();   
             var bStarted = false;
             if (arStats.length > 0) {
                 bStarted = view.onUploadRecordStatsList(nMode, arStats, UploadStatsListCompleted);
                 if (!bStarted)
-                    view.ShowStatus('Uploading stats items failed to start.');
+                    view.AppendStatusLine('Uploading stats items failed to start.'); // AppendStatusLine() to status error shown by onDone. 
                 else
                     view.ShowStatus('Uploading stats items to server.', false);
             } else {
@@ -677,7 +697,8 @@ function wigo_ws_View() {
         });
 
         // Delete stats list from server.
-        $('#buDeleteStatsList').bind('click', function (e) { 
+        $('#buDeleteStatsList').bind('click', function (e) {
+            view.ClearStatus();   
             var bStarted = false;
             if (arDeleteStats.length > 0) {
                 var timeStamp;
@@ -688,7 +709,7 @@ function wigo_ws_View() {
                 }
                 bStarted = view.onDeleteRecordStatsList(nMode, arTimeStamp, DeleteStatsListCompleted);
                 if (!bStarted)
-                    view.ShowStatus('Deleting RecordStatsList failed to start.');
+                    view.AppendStatusLine('Deleting RecordStatsList failed to start.'); // AppendStatusLine() to status error shown by onDone. 
                 else
                     view.ShowStatus("Deleting stats items at server.", false);
             } else {
@@ -1215,8 +1236,11 @@ function wigo_ws_View() {
 
     // Set Facebook login.
     // NOTE: appid must be in sync for private\appSettings.config
-    // var fb = new wigo_ws_FaceBookAuthentication('694318660701967'); //MainAppId $$$$ put back when done
-    var fb = new wigo_ws_FaceBookAuthentication('870220976445067'); //LocalTestingAppId.
+    var fb;
+    if (bLocalDebug) 
+        fb = new wigo_ws_FaceBookAuthentication('870220976445067'); //LocalTestingAppId.
+    else
+        fb = new wigo_ws_FaceBookAuthentication('694318660701967'); //MainAppId
 
     fb.callbackAuthenticated = cbFbAuthenticationCompleted;
 }

@@ -196,9 +196,7 @@ function wigo_ws_Model(deviceDetails) {
     //      Returns: void
     //  Synchronous return: boolean. true indicates upload successfully started.
     // Remarks: User must be signed in. If user is not signed in, calls onDone(..) 
-    // immediately indicating user is not signed in and returns true indicating
-    // transfer started (although it fails immediately) because
-    // user is not signed in.
+    // immediately indicating user is not signed in and returns false.
     this.uploadRecordStatsList = function (arStats, onDone) { 
         var ah = this.getAccessHandle();
         var id = this.getOwnerId();
@@ -206,8 +204,8 @@ function wigo_ws_Model(deviceDetails) {
         if (ah.length > 0 && id.length > 0) {
             bStarted = api.UploadRecordStatsList(id, ah, arStats, onDone);
         } else {
-            // Can not upload because user id is invalid. Indicate synchronous start, but callback with error.
-            bStarted = true;
+            // Can not upload because user id is invalid. 
+            bStarted = false;  
             if (onDone) {
                 onDone(false, "User must be signed in.");
             }
@@ -224,9 +222,7 @@ function wigo_ws_Model(deviceDetails) {
     //      Returns: void
     //  Synchronous return: boolean. true indicates delete successfully started.
     // Remarks: User must be signed in. If user is not signed in, calls onDone(..) 
-    // immediately indicating user is not signed in and returns true indicating
-    // transfer started (although it fails immediately) because
-    // user is not signed in.
+    // immediately indicating user is not signed in and returns false.
     this.deleteRecordStatsList = function (arTimeStamp, onDone) { 
         var ah = this.getAccessHandle();
         var id = this.getOwnerId();
@@ -234,8 +230,8 @@ function wigo_ws_Model(deviceDetails) {
         if (ah.length > 0 && id.length > 0) {
             bStarted = api.DeleteRecordStatsList(id, ah, arTimeStamp, onDone);
         } else {
-            // Can not delete at server because user id is invalid. Indicate synchronous start, but callback with error.
-            bStarted = true;
+            // Can not delete at server because user id is invalid. 
+            bStarted = false; 
             if (onDone) {
                 onDone(false, "User must be signed in.");
             }
@@ -252,9 +248,7 @@ function wigo_ws_Model(deviceDetails) {
     //      Returns: void
     //  Synchronous return: boolean. true indicates download successfully started.
     // Remarks: User must be signed in. If user is not signed in, calls onDone(..) 
-    // immediately indicating user is not signed in and returns true indicating
-    // transfer started (although it fails immediately) because
-    // user is not signed in.
+    // immediately indicating user is not signed in and returns false.
     this.downloadRecordStatsList = function (onDone) { 
         var ah = this.getAccessHandle();
         var id = this.getOwnerId();
@@ -262,8 +256,8 @@ function wigo_ws_Model(deviceDetails) {
         if (ah.length > 0 && id.length > 0) {
             bStarted = api.DownloadRecordStatsList(id, ah, onDone);
         } else {
-            // Can not upload because user id is invalid. Indicate synchronous start, but callback with error.
-            bStarted = true;
+            // Can not upload because user id is invalid. 
+            bStarted = false;  
             if (onDone) {
                 onDone(false, [], "User must be signed in.");
             }
