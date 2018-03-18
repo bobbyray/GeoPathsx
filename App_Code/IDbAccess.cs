@@ -1,5 +1,5 @@
 ﻿/* 
-Copyright (c) 2015 - 2017 Robert R Schomburg
+Copyright (c) 2015 - 2018 Robert R Schomburg
 Licensed under terms of the MIT License, which is given at
 https://github.com/bobbyray/MitLicense/releases/tag/v1.0
 */
@@ -54,13 +54,13 @@ public interface IDbAccess
     DbResult GpxDelete(string sOwnerId, int nId); 
 
     /// <summary>
-    /// Sets a list of Gpx obj found in database.
+    /// Gets a list of Gpx objs found in database.
     /// Returns result of of database access.
     /// </summary>
     /// <param name="sOwnerId">Id of owner of Gpx records in database.
     /// If null, any owner record is valid to included.</param>
     /// <param name="eShare">Indicates sharing of record: public, private or protected.</param>
-    /// <param name="list">Ref to list [out] that is filled database.</param>
+    /// <param name="list">Ref to list [out] that is filled from database.</param>
     /// <returns></returns>
     DbResult GetGpxList(string sOwnerId, byte eShare, GpxList list);
 
@@ -73,7 +73,7 @@ public interface IDbAccess
     /// <param name="eShare">Indicates sharing of record: public, private or protected.</param>
     /// <param name="gptSW">SouthWest corner of rectangle.</param>
     /// <param name="gptNE">NorthEast corner of rectangle.</param>
-    /// <param name="list">Ref to list [out] that is filled database.</param>
+    /// <param name="list">Ref to list [out] that is filled from database.</param>
     /// <returns></returns>
     DbResult GetGpxListByLatLon(string sOwnerId, byte eShare, GeoPt gptSW, GeoPt gptNE, GpxList list);
     
@@ -103,4 +103,36 @@ public interface IDbAccess
     /// <param name="accessHandle">Access handle for verification.</param>
     /// <returns></returns>
     DbResult Logout(string sOwnerId, string accessHandle);
+
+    //20180226 **** Additions for Record Stats
+
+    /// <summary>
+    /// Stores list of GeoTrailRecordStats object in database.
+    /// Replaces an existing record in the database, or creates a new one
+    /// when there is no existing record.
+    /// </summary>
+    /// <param name="sOwnerId">Owner id to identify to whom the stats belong.</param>
+    /// <param name="statsList">List of stats objects to store in database.</param>
+    /// <param name="bOverWrite">true to always replace stats in database even if stats element in statsList is same as database record.</param>
+    /// <returns></returns>
+    DbResult UploadRecordStatsList(string sOwnerId, GeoTrailRecordStatsList statsList, bool bOverWrite = false);
+
+    /// <summary>
+    /// Gets a list of GeoTrailRecordStats objects found in database.
+    /// Returns result of database access.
+    /// </summary>
+    /// <param name="sOwnerId">Id of owner of Gpx records in database.
+    /// If null, any owner record is valid to included.</param>
+    /// <param name="list">Ref to list [out] that is filled from database.</param>
+    /// <returns></returns>
+    DbResult DownloadRecordStatsList(string sOwnerId, GeoTrailRecordStatsList list);
+
+    /// <summary>
+    /// Deletes a list GeoTrailRecordStats object found in database.
+    /// Returns result of database access.
+    /// </summary>
+    /// <param name="sOwnerId">Id of owner of stats records</param>
+    /// <param name="list">List of timestamps identifying stats records to delete.</param>
+    /// <returns></returns>
+    DbResult DeleteRecordStatsList(string sOwnerId, GeoTrailTimeStampList list);
 }

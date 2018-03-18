@@ -7,7 +7,7 @@ https://github.com/bobbyray/MitLicense/releases/tag/v1.0
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Gpx Paths</title>
+    <title>Gpx Paths Tester</title>
     <link rel="stylesheet" href="leaflet-1.0.3/leaflet.css" />
     <link rel="stylesheet" href="Css/GpxPaths2.css">
     <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
@@ -32,6 +32,7 @@ https://github.com/bobbyray/MitLicense/releases/tag/v1.0
             <li><a href="#tabs-upload">2) Upload</a></li>
             <li><a href="#tabs-edit">Edit</a></li>
             <li><a href="#tabs-view">View</a></li>
+            <li><a href="#tabs-stats">Stats</a></li>
             <li><a href="#tabs-about">About</a></li>
         </ul>
         <div id="tabs-define">
@@ -140,6 +141,49 @@ https://github.com/bobbyray/MitLicense/releases/tag/v1.0
             </p>
             <p>The GeoTrail app for your Android phone is available in the <i>Google Play Store</i>.</p>
             <p>The Pebble GeoTrail app for your watch is available in the <i>Pebble Store</i>.</p>
+        </div>
+        <div id='tabs-stats'>
+            <h2>Test for Record Stats</h2>
+            If not already signed in, <a href="#selectSignIn">select</a> <i>Sign In</i>&gt;<i>Facebook</i>.
+            <div class="StatsRow">
+                <div class="SelectItemDiv">
+                    <span>Items to Upload</span><br/>
+                    <select id="selectStatsItem">
+                        <option value="0">Select Upload Item</option>
+                    </select>
+                </div>
+                <div class="SelectItemDiv">
+                    <span>Items to Delete</span><br/>
+                    <select id="selectStatsDeletionItem">
+                        <option value="0">Select Delete Item</option>
+                    </select>
+                </div>
+            </div>
+            <div class="StatsRow">
+                <label class="StatsItemLabel">TimeStamp</label> <input id="statsTimeStamp" type="datetime-local" />
+            </div>
+            <div class="StatsRow">
+                <label class="StatsItemLabel">RunTime (min:sec)</label> <input id="statsRunTimeMins" type="number" />:<input id="statsRunTimeSecs" type="number" />
+            </div>
+            <div class="StatsRow">
+                <label class="StatsItemLabel">Distance (meter)</label> <input id="statsDistance" type="number" />
+            </div>
+            <div class="StatsRow">
+                <label class="StatsItemLabel">Calories Kinetic</label> <input id="statsCaloriesKinetic" type="number" />
+            </div>
+            <div class="StatsRow">
+                <label class="StatsItemLabel">Calories Burned Calc</label> <input id="statsCaloriesBurnedCalc" type="number" />
+            </div>
+            <div class="StatsRow">
+                <button id="buDownloadStatsList">Download Stats List</button> 
+                <button id="buUploadStatsList">Upload Stats List</button>
+                <button id="buDeleteStatsList">Delete Stats List at Server</button>
+            </div>  
+            <div class="StatsRow">
+                <button id="buNewStatsItem">New Stats Item</button> 
+                <button id="buSetStatsItemInList">Set Stats Item in List</button>
+                <button id="buDeleteStatsItemInList">Delete Stats Item from List</button> 
+            </div>          
         </div>
     </div>
 

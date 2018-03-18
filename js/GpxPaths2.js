@@ -1,6 +1,6 @@
 'use strict';
 /* 
-Copyright (c) 2015, 2016 Robert R Schomburg
+Copyright (c) 2015, 2016, 2018 Robert R Schomburg
 Licensed under terms of the MIT License, which is given at
 https://github.com/bobbyray/MitLicense/releases/tag/v1.0
 */
@@ -35,7 +35,6 @@ function wigo_ws_View() {
     //      no item selected.
     this.onDelete = function (nMode, ixPathArray) { };
 
-
     // Get list of paths from server.
     // Handler Signature:
     //  nMode: byte value of this.eMode enumeration.
@@ -63,6 +62,42 @@ function wigo_ws_View() {
     //      by EAuthStatus in Service.cs.
     this.onAuthenticationCompleted = function (result) { };
 
+    //20180224 additions for Stats tab 
+    // Uploads to web server a list of record stats items.
+    // An item is replaced if it already exists at server, or is 
+    // created if it does not exist.
+    // Arg:
+    //  nMode: byte value of this.eMode enumeration.
+    //  arStats: array of wigo_ws_GeoTrailRecordStats objs.
+    //  onDone: callback after async completion, signature:
+    //      bOk: boolean: true for sucessful upload.
+    //      sStatus: string: description for the update result.
+    //      Returns: void
+    //  Synchronous return: boolean. true indicates upload successfully started.
+    this.onUploadRecordStatsList = function (nMode, arStats, onDone) { return false;};
+
+    // Deletes at web server a list of record stats items.
+    // Arg:
+    //  nMode: byte value of this.eMode enumeration.
+    //  arTimeStamp: array of wigo_ws_GeoTrailTimeStamp objs. timestamps identifying wigo_ws_GeoTrailRecordStats objs to delete.
+    //  onDone: callback after async completion, signature:
+    //      bOk: boolean: true for sucessful delete.
+    //      sStatus: string: description for the delete result.
+    //      Returns: void
+    //  Synchronous return: boolean. true indicates delete successfully started.
+    this.onDeleteRecordStatsList = function (nMode, arTimeStamp, onDone) { return false; }; 
+
+    // Downloads from web server a list of all the record stats items.
+    // Args:
+    //  nMode: byte value of this.eMode enumeration.
+    //  onDone: callback after async completion, signature:
+    //      bOk: boolean: true for sucessful download.
+    //      arStats: array of wigo_ws_GeoTrailRecordStats objs. the downloaded list.
+    //      sStatus: string. description for the download result.
+    //      Return: void
+    //  Synchronous return: boolean. true indicates upload successfully started.
+    this.onDownloadRecordStatsList = function (nMode, onDone) { return false;};
+
     // ** Public members
 
     // Enumeration of Authentication status (login result)
@@ -72,7 +107,7 @@ function wigo_ws_View() {
 
     // Enumeration of mode for processing geo paths.
     this.eMode = {
-        edit: 0, upload: 1, view: 2, define: 3, about: 4,
+        edit: 0, upload: 1, view: 2, define: 3, about: 4, stats: 5,
         toNum: function(sMode) { // Returns byte value for sMode property name.
             var nMode = this[sMode];
             if (nMode === undefined)
@@ -85,7 +120,9 @@ function wigo_ws_View() {
                 case this.edit: sMode = 'edit'; break;
                 case this.upload: sMode = 'upload'; break;
                 case this.view: sMode = 'view'; break;
-                default: sMode = 'define'; 
+                case this.view: sMode = 'stats'; break;
+                default: sMode = 'define';
+
             }
             return sMode;
         },
@@ -101,6 +138,8 @@ function wigo_ws_View() {
                 nMode = this.define;
             else if (sPanelSelector === 'tabs-about')
                 nMode = this.about;
+            else if (sPanelSelector === 'tabs-stats')
+                nMode = this.stats;
             else
                 nMode = this.define;
             return nMode;
@@ -211,7 +250,7 @@ function wigo_ws_View() {
     //  newMode: eMode enumeration value for the new mode.
     this.setModeUI = function (newMode) {
         nMode = newMode;
-        MinimizeMap(); // Note: Minimize map shows edit ctrls except for define or about mode.
+        MinimizeMap(); // Note: Minimize map shows edit ctrls except for define, about, or stats mode.
         switch (nMode) {
             case this.eMode.edit:
                 $(buUpload).prop('disabled', true);       // Disable upload. Enable when upload file is selected.
@@ -296,6 +335,9 @@ function wigo_ws_View() {
                 $(buLoadFromServer).prop('disabled', true); // Disable loading list of paths from server.
                 buLoadFromServer.style.display = 'none';
                 break;
+            case this.eMode.stats: 
+                ShowSignInCtrls(true); 
+                break;
             case this.eMode.about:
                 break;
         }
@@ -317,6 +359,24 @@ function wigo_ws_View() {
         divStatus.innerHTML = sStatus;
         SetMapPanelTop();
         window.scrollTo(0, 0);
+    };
+
+    // Appends a status messages starting on a new line to current status message and
+    // shows the full message.
+    // Arg:
+    //  sStatus: string of html to display.
+    //  bError: boolean, optional. Indicates an error msg. Default to true.
+    this.AppendStatusLine = function (sStatus, bError) {  
+        // If current statusDiv does not end with <br/>, append <br/>
+        var s = divStatus.innerHTML;
+        if (s.length > 0) {
+            // Replace <br/> ending a string.
+            s = s.replace(/<br\/*>\s*$/i, "")
+            s += '<br/>';
+        }
+        s += sStatus;
+
+        this.ShowStatus(s, bError);
     };
 
     // Clears the status message.
@@ -580,7 +640,6 @@ function wigo_ws_View() {
     });
 
     $(tabs).tabs();
-
     $(tabs).on("tabsactivate", function (event, ui) {
         that.ClearStatus();
         if (ui && ui.newPanel.length > 0) {
@@ -596,6 +655,464 @@ function wigo_ws_View() {
         SetMapPanelTop();
     });
 
+    //20180228 Additions for Stats Tab
+    // Helper for controls used on stats tab.
+    function StatsUIMgr(view) { 
+        // **** Controls
+        var jqselectStatsItem = $('#selectStatsItem');
+        var selectStatsItem = jqselectStatsItem[0]; 
+        var jqselectStatsDeletionItem = $('#selectStatsDeletionItem'); 
+        var selectStatsDeletionItem = jqselectStatsDeletionItem[0]; 
+        var jqstatsTimeStamp = $('#statsTimeStamp');
+        var jqstatsRunTimeMins = $('#statsRunTimeMins');
+        var jqstatsRunTimeSecs = $('#statsRunTimeSecs');
+        var jqstatsDistance = $('#statsDistance');
+        var jqstatsCaloriesKinetic = $('#statsCaloriesKinetic');
+        var jqstatsCaloriesBurnedCalc = $('#statsCaloriesBurnedCalc');
+
+        // **** Add event handlers for Stats tab.
+        // Download stats list from server.
+        $('#buDownloadStatsList').bind('click', function (e) {
+            view.ClearStatus();   
+            var bStarted = view.onDownloadRecordStatsList(nMode, DownloadStatsListCompleted);
+            if (!bStarted)
+                view.AppendStatusLine("Downloading stats items failed to start."); // AppendStatusLine() to status error shown by onDone. 
+            else
+                view.ShowStatus("Downloading stats items from server.", false);
+        });
+
+        // Upload stats list to server.
+        $('#buUploadStatsList').bind('click', function (e) {
+            view.ClearStatus();   
+            var bStarted = false;
+            if (arStats.length > 0) {
+                bStarted = view.onUploadRecordStatsList(nMode, arStats, UploadStatsListCompleted);
+                if (!bStarted)
+                    view.AppendStatusLine('Uploading stats items failed to start.'); // AppendStatusLine() to status error shown by onDone. 
+                else
+                    view.ShowStatus('Uploading stats items to server.', false);
+            } else {
+                view.ShowStatus("There are no stats items to upload.");
+            }
+        });
+
+        // Delete stats list from server.
+        $('#buDeleteStatsList').bind('click', function (e) {
+            view.ClearStatus();   
+            var bStarted = false;
+            if (arDeleteStats.length > 0) {
+                var timeStamp;
+                var arTimeStamp = [];
+                for (var i = 0; i < arDeleteStats.length; i++) {
+                    timeStamp = new wigo_ws_GeoTrailTimeStamp(arDeleteStats[i].nTimeStamp)
+                    arTimeStamp.push(timeStamp);
+                }
+                bStarted = view.onDeleteRecordStatsList(nMode, arTimeStamp, DeleteStatsListCompleted);
+                if (!bStarted)
+                    view.AppendStatusLine('Deleting RecordStatsList failed to start.'); // AppendStatusLine() to status error shown by onDone. 
+                else
+                    view.ShowStatus("Deleting stats items at server.", false);
+            } else {
+                view.ShowStatus("There are no stats items to delete.");
+            }
+        });
+
+        // Clear stats item.
+        $('#buNewStatsItem').bind('click', function (e) {
+            var stats = new wigo_ws_GeoTrailRecordStats();
+            stats.nTimeStamp = Date.now();
+            stats.msRunTime = 1000; 
+            stats.mDistance = 1; 
+            SetStatsItemCtrls(stats);
+            selectStatsItem.selectedIndex = 0;            
+            selectStatsDeletionItem.selectedIndex = 0;    
+            view.ClearStatus(); 
+        });
+
+        // Adds a new stats item or replaces an existing one based
+        // on values in the stats item controls (fields).
+        // Also removes the stats item from the deletion list if need be.
+        $('#buSetStatsItemInList').bind('click', function (e) {
+            var stats = SetStatsItemList(selectStatsItem, arStats);
+            if (stats)
+                RemoveFromStatsItemList(selectStatsDeletionItem, arDeleteStats, stats.nTimeStamp);
+            selectStatsDeletionItem.selectedIndex = 0; 
+            if (stats)  
+                view.ClearStatus(); 
+            else
+                view.ShowStatus('Stats item input is invalid.');
+        });
+
+        // Deletes a stats item in the deletion list (or replaces an existing one) based
+        // on values in the stats item controls (fields). Also removes the stats item
+        // from the selection list if need be.
+        $('#buDeleteStatsItemInList').bind('click', function (e) {  
+            var stats = SetStatsItemList(selectStatsDeletionItem, arDeleteStats);
+            if (stats)
+                RemoveFromStatsItemList(selectStatsItem, arStats, stats.nTimeStamp);
+            selectStatsItem.selectedIndex = 0; 
+            if (stats)  
+                view.ClearStatus(); 
+            else
+                view.ShowStatus('Stats item input is invalid.');
+        });
+
+
+        // Adds a new stats item or replaces an existing one based
+        // on values in the stats item controls (fields).
+        // The stats item is add/replaced in both the select ctrl and the data array.
+        // Args:
+        //  selectStatsItem: ref to HTML Select element. The control to which stats option is added/replaced.
+        //  arStats: ref to array of wigo_ws_GeoTrailRecordStats objs. the data array to which stats obj is added/replaced.
+        // Returns: ref to wigo_ws_GeoTrailRecordStats. The stats obj obtained from the stats item controls.
+        //          null if stats items controls are not all valid.
+        function SetStatsItemList(selectStatsItem, arStats) { 
+            var stats = GetStatsItemCtrls();
+            // Quit is timestamp is invalid.
+            if (Number.isNaN(stats.nTimeStamp)) {
+                view.ShowStatus("Timestamp is invalid. Enter Stats Item fields.");
+                return null;
+            }
+            // Replace existing stats obj in arStats or add new obj if not in array.
+            var ixStats = FindStatsObjIx(arStats, stats.nTimeStamp); 
+            if (ixStats > -1) {
+                arStats[ixStats] = stats; // Replace existing stats obj.
+            } else {
+                // Add stats to array of stats.
+                arStats.push(stats);
+            }
+
+            var newOption = FormStatsSelectOption(stats);
+
+            if (selectStatsItem.length < 1) {
+                // selection list is empty, append a prompt.
+                selectStatsItem.add(new Option("Select Stats Item"), 0);
+            }
+
+            // Replace or add new option in selectStatsItem control.
+            var ixOption = FindStatsOptionIx(selectStatsItem, stats.nTimeStamp);  
+            if (ixOption > -1) {
+                // Replace existing option with new option.
+                selectStatsItem.remove(ixOption);
+                selectStatsItem.add(newOption, ixOption)
+            } else {
+                // Add new option at index 1 because index 0 is a prompt to select a stats item.
+                selectStatsItem.add(newOption, 1);
+            }
+            return stats;
+        }
+
+        // Forms select control option based on a stats timestamp.
+        // Arg:
+        //  stats: wigo_ws_GeoTrailRecordStats obj. stats.nTimesTamp is used to the option.
+        // Returns: new Option element for a HTML Select element.
+        function FormStatsSelectOption(stats) { 
+            // Form the new option.
+            var dateTimeStamp = new Date(stats.nTimeStamp);
+            var sDate = dateTimeStamp.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            var newOption = new Option(sDate, stats.nTimeStamp, true, true);
+            newOption.setAttribute('data-msDate', stats.nTimeStamp.toFixed(0));
+            return newOption;
+        }
+
+
+        // Removes a stats items from a selection and from an array of stats.
+        // Args:
+        //  selectStatsList: ref to HTML select element. the selection list control.
+        //  arStats: ref to array of wigo_ws_GeoTrailRecordStats objs. the array of stats data objects.
+        //  nTimeStamp: number. the timestamp in milliseconds identifying the stats to remove.
+        // Note: Ok to call even if the stats option or data object is not found.
+        function RemoveFromStatsItemList(selectStatsList, arStats, nTimeStamp) { 
+            // Remove option element from selectStatsList if the option exists.
+            var ixOption = FindStatsOptionIx(selectStatsList, nTimeStamp);
+            if (ixOption > 0) {
+                selectStatsList.remove(ixOption);
+            }
+            
+            // Remove element from arStats if element exists.
+            var ixStats = FindStatsObjIx(arStats, nTimeStamp); 
+            if (ixStats > -1) {
+                arStats.splice(ixStats, 1);
+            }
+        }
+
+        // Sets the stats item controls for the item selected in the selection list.
+        jqselectStatsItem.bind('click',function(e){
+            SetStatsItemCtrlsFromSelected(selectStatsItem, arStats);
+            selectStatsDeletionItem.selectedIndex = 0; // Deselect Deletions dropdown. 
+        });
+
+        // Sets the stats item controls for the item selected in the deletion list.
+        jqselectStatsDeletionItem.bind('click', function (e) {
+            SetStatsItemCtrlsFromSelected(selectStatsDeletionItem, arDeleteStats);
+            selectStatsItem.selectedIndex = 0; // Deselect the upload dropdown.
+        });
+
+        // Sets the stats item controls for the selected item in a select control.
+        // Arg:
+        //  selectStatsItem: HTML Select control. the select control.
+        //  arStats: ref to array of wigo_ws_GeoTrailRecordStats objs. the array of stats data objects for search to match selected item.
+        function SetStatsItemCtrlsFromSelected(selectStatsItem, arStats) { 
+            if (selectStatsItem.selectedIndex > 0) {
+                var option = selectStatsItem.item(selectStatsItem.selectedIndex);
+                var nTimeStamp = Number.parseInt(option.getAttribute('data-msdate'));
+                var stats = FindStatsObj(arStats, nTimeStamp);
+                if (stats) {
+                    SetStatsItemCtrls(stats);
+                }
+            } else { 
+                ClearStatsItemCtrls();
+            }
+        }
+
+        // **** Completion handlers for transfer with the server.
+        function UploadStatsListCompleted(bOk, sStatus) {
+            if (bOk) {
+                view.ShowStatus("Successfully uploaded Stats List.", false);
+            } else {
+                view.ShowStatus("Upload of Stats List failed: " + sStatus);
+            }
+        }
+
+        function DeleteStatsListCompleted(bOk, sStatus) { 
+            if (bOk) {
+                // Set stats item fields based on selection in selectStatsItem droplist.
+                SetStatsItemCtrlsFromUploadDropDown(); 
+                view.ShowStatus("Successfully deleted Stats List at server.", false);
+            } else {
+                view.ShowStatus("Deletion of Stats List failed: " + sStatus);
+            }
+        }
+
+        function DownloadStatsListCompleted(bOk, arDownloadedStats, sStatus) {  
+            if (bOk) {
+                // clear the selectStatsItem and selecStatDeletion controls and associated stats data arrays.
+                ClearSelectCtrl(selectStatsItem, arStats);
+                ClearSelectCtrl(selectStatsDeletionItem, arDeleteStats);
+                // Add the downloaded stats to the selectStatsItem control and associated data array.
+                var option;
+                for (var i = 0; i < arDownloadedStats.length; i++) {
+                    option = FormStatsSelectOption(arDownloadedStats[i]);
+                    selectStatsItem.add(option);
+                    arStats.push(arDownloadedStats[i])
+                }
+                SetStatsItemCtrlsFromUploadDropDown();
+                var sMsg = "Successfully downloaded {0} stats items.".format(arDownloadedStats.length);
+                view.ShowStatus(sMsg, false);
+            } else {
+                view.ShowStatus("Download of stats failed: " + sStatus);
+            }
+
+        }
+
+        // ****
+        // Array of wigo_ws_GeoTrailRecordStats objects for uploading or downloading.
+        var arStats = [];        // Stats items to uploading/downloading.
+        var arDeleteStats = [];  // Stats items for deletion when uploading. 
+
+
+
+        // Clears a html select control and its associated stats data array.
+        // Args:
+        //  selectCtrl: ref to HTML Select Element. the select control.
+        //  arStats: ref to array of wigo_ws_GeoTrailRecordStats obj. the associated stats data objects.
+        function ClearSelectCtrl(selectCtrl, arStats) { 
+            // Remove all the option elements from selectCtrl, except item(0) which is a prompt.
+            var nOptionCount = selectCtrl.length;
+            for (var i = 1; i < nOptionCount; i++) {
+                selectCtrl.remove(1); // Always remove element at index 1 until there is only element 0 left. 
+            }
+            // Remove all elements in the associated data array of stats objects.
+            arStats.splice(0,arStats.length)
+        }
+
+        // Finds an object in arStats.
+        // Arg:
+        //  arStats: array of wigo_ws_GeoTrailRecordStats objects.
+        //  nTimeStamp: number. timestamp in milliseconds of object to find.
+        // Returns: ix in arStats to the wigo_ws_GeoTrailRecordStats obj if found, or -1 if not found.
+        function FindStatsObjIx(arStats, nTimeStamp) {
+            var foundIx = -1;
+            for (var i = 0; i < arStats.length; i++) {
+                if (arStats[i].nTimeStamp === nTimeStamp) {
+                    foundIx = i;
+                    break;
+                }
+            }
+            return foundIx;
+        }
+
+
+        // Finds an object in arStats.
+        // Arg:
+        //  arStats: array of wigo_ws_GeoTrailRecordStats object.
+        //  nTimeStamp: number. timestamp in milliseconds of object to find.
+        // Returns: ref to wigo_ws_GeoTrailRecordStats if found, or null if not found.
+        function FindStatsObj(arStats, nTimeStamp) { 
+            var ix = FindStatsObjIx(arStats, nTimeStamp); 
+            if (ix > -1)
+                return arStats[ix];
+            else
+                return null;
+        }
+
+        // Finds an Option item in a selectStatsItem control.
+        // Arg:
+        //  selectStatsItem: ref to HTML Select element. 
+        //  nTimeStamp: number. timestamp in milliseconds of data-msdate attribute to find.
+        // Returns: number for index of HTML Option item found, or -1 if not found.
+        function FindStatsOptionIx(selectStatsItem, nTimeStamp) {
+                var ixFound = -1;
+            var item;
+            var msDate = 0;
+            for (var i = 0; i < selectStatsItem.length; i++) {
+                item = selectStatsItem.item(i);
+                msDate = Number.parseInt(item.getAttribute('data-msdate'));
+                if (msDate === nTimeStamp) {
+                    ixFound = i;
+                    break;
+                }
+            }
+            return ixFound;
+        }
+
+        // Returns a string that is at least two digits.
+        // Arg: 
+        //  num: number. a number to convert to a string.
+        function TwoDigitsMin(num) {
+            var sNum;
+            if (num < 10 && num >= 0)
+                sNum = '0' + num.toFixed(0);
+            else
+                sNum = num.toFixed(0);
+            return sNum;
+        }
+        
+        function FormDateCtrlValue(date) {
+            if (typeof date === 'number')
+                date = new Date(date);
+            // yyyy-MM-ddThh:mm
+            var sVal = "{0}-{1}-{2}T{3}:{4}".format(
+                        date.getFullYear(), TwoDigitsMin(date.getMonth()+1), TwoDigitsMin(date.getDate()),
+                        TwoDigitsMin(date.getHours()), TwoDigitsMin(date.getMinutes())
+                        );
+            return sVal;
+        }
+
+        // Sets a date ctrl.
+        // Arg:
+        //  jqctrl: jquery input control of type datetime-local.
+        //  msDate: number. milliseconds for Date obj value.
+        function SetDateCtrl(jqctrl, msDate) {
+            var sValue = FormDateCtrlValue(msDate);
+            jqctrl.val(sValue);
+            jqctrl.attr('data-msdate', msDate);
+        }
+
+        // Gets value for date ctrl.
+        // Arg:
+        //  jqctrl: jquery input control of type datetime-local.
+        //  bUpdateDataAttr: boolean, optional. true to update, if changed, data attr from control value.
+        //                   Defaults to true if not given.
+        // Returns: number. Date value in milliseconds.
+        // Note: If user changes the date/time control, the value
+        //       returned is only resolved to minutes in a day, with seconds
+        //       and milliseconds components zero for the day. If user does
+        //       not change the date, the time set into the control
+        //       is returned resolved to milliseconds for the day.
+        function GetDateCtrl(jqctrl, bUpdateDataAttr) {
+            //  jqctrl: jquery input control of type datetime-local.
+            if (typeof bUpdateDataAttr !== 'boolean')
+                bUpdateDataAttr = true;
+
+            var newDate = new Date(jqctrl.val());
+            var msCurDate = Number.parseInt(jqctrl.attr('data-msdate')); // date attr date in milliseconds as integer.
+            var curDate = new Date(msCurDate);
+            var bSame = curDate.getFullYear() === newDate.getFullYear() &&
+                        curDate.getMonth() === newDate.getMonth() &&
+                        curDate.getDate() === newDate.getDate() &&
+                        curDate.getHours() === newDate.getHours() &&
+                        curDate.getMinutes() === newDate.getMinutes();
+            var msDate; // Date to return in milliseconds at integer.
+            if (!bSame) {
+                msDate = newDate.getTime();
+                if (bUpdateDataAttr) {
+                    jqctrl.attr('data-msdate', msDate.toFixed(0));
+                }
+            } else {
+                msDate = msCurDate;
+            }
+            return msDate;
+        }
+
+        // Sets run time for minutes and seconds input controls.
+        // Args:
+        //  jqmins: jquery number control for minutes.
+        //  jqsecs: jqery number control for seconds.
+        //  msRunTime: number. the runtime in milliseconds set into the controls.
+        function SetRunTimeCtrls(jqmins, jqsecs, msRunTime) {
+            var secs = msRunTime / 1000;
+            var mins = Math.floor(secs / 60);
+            secs = secs - 60 * mins;
+            jqmins.val(mins);
+            jqsecs.val(secs);
+        }
+
+        // Get run time from minutes and seconds input controls.
+        // Args:
+        //  jqmins: jquery number control for minutes.
+        //  jqsecs: jqery number control for seconds.
+        //  Returns: number. the run time in milliseconds from the controls.
+        function GetRunTimeCtrls(jqmins, jqsecs) {
+            var mins = Number.parseInt(jqmins.val(),10);
+            var secs = Number.parseInt(jqsecs.val(),10);
+            var msRunTime = (mins * 60 + secs) * 1000;
+            return msRunTime;
+        }
+
+        // Set values in the stats item ctrls.
+        // Arg:
+        //  stats: wigo_ws_GeoTrailRecordStats obj specifying values for the ctrls.
+        function SetStatsItemCtrls(stats) {
+            SetDateCtrl(jqstatsTimeStamp, stats.nTimeStamp);
+            SetRunTimeCtrls(jqstatsRunTimeMins, jqstatsRunTimeSecs, stats.msRunTime);
+            jqstatsDistance.val(stats.mDistance);
+            jqstatsCaloriesKinetic.val(stats.caloriesKinetic);
+            jqstatsCaloriesBurnedCalc.val(stats.caloriesBurnedCalc);
+        }
+
+        // Get values from the controls for a stats item.
+        // Returns: wigo_ws_GeoTrailRecordStats obj. obj is set from values in the controls.
+        function GetStatsItemCtrls() {
+            var stats = new wigo_ws_GeoTrailRecordStats();
+            stats.nTimeStamp = GetDateCtrl(jqstatsTimeStamp);
+            stats.msRunTime = GetRunTimeCtrls(jqstatsRunTimeMins, jqstatsRunTimeSecs);
+            stats.mDistance = jqstatsDistance.val();
+            stats.caloriesKinetic = jqstatsCaloriesKinetic.val();
+            stats.caloriesBurnedCalc = jqstatsCaloriesBurnedCalc.val();
+            return stats;
+        }
+
+        // Sets the stats item ctrls (user input field) from the selected option
+        // in the selectStatsItem dropdown list.
+        // Also sets the selectStatsDeletionItem drop to option 0, the prompt.
+        function SetStatsItemCtrlsFromUploadDropDown() { 
+            SetStatsItemCtrlsFromSelected(selectStatsItem, arStats); 
+            // Ensure prompt is selected for the deletions droplist since an option in it should not be selected.
+            selectStatsDeletionItem.selectedIndex = 0;
+        }
+
+        // Clears the user input for the stats item control.
+        function ClearStatsItemCtrls() { 
+            jqstatsTimeStamp.val("");
+            jqstatsRunTimeMins.val(""); 
+            jqstatsRunTimeSecs.val("")
+            jqstatsDistance.val("");
+            jqstatsCaloriesKinetic.val("");
+            jqstatsCaloriesBurnedCalc.val("");
+        }
+    }
+    var statsUIMgr = new StatsUIMgr(this);
 
     // ** Private members for open streets map
     var map = new wigo_ws_GeoPathMap();
@@ -612,7 +1129,6 @@ function wigo_ws_View() {
                              nMode === that.eMode.view ||
                              nMode === that.eMode.edit;
         return bShowEditCtrls;
-
     }
 
     // Display map below divPath info rather than at the top of the screen.
@@ -686,15 +1202,22 @@ function wigo_ws_View() {
             divPathInfo.style.display = 'none';
     }
     
-    // Shows or hides edit controls that are above the map.
+    // Shows or hides sigin controls including user name and signin droplist.
     // Arg:
     //  bShow: boolean indicating to show.
-    function ShowEditCtrls(bShow) {
+    function ShowSignInCtrls(bShow) { 
         if (bShow) {
             divOwnerId.style.display = 'block';
         } else {
             divOwnerId.style.display = 'none';
         }
+    }
+
+    // Shows or hides edit controls that are above the map.
+    // Arg:
+    //  bShow: boolean indicating to show.
+    function ShowEditCtrls(bShow) {
+        ShowSignInCtrls(bShow);
 
         ShowPathInfoDiv(bShow);
     }
@@ -713,8 +1236,11 @@ function wigo_ws_View() {
 
     // Set Facebook login.
     // NOTE: appid must be in sync for private\appSettings.config
-    var fb = new wigo_ws_FaceBookAuthentication('694318660701967'); //MainAppId 
-    // var fb = new wigo_ws_FaceBookAuthentication('870220976445067'); //LocalTestingAppId.
+    var fb;
+    if (bLocalDebug) 
+        fb = new wigo_ws_FaceBookAuthentication('870220976445067'); //LocalTestingAppId.
+    else
+        fb = new wigo_ws_FaceBookAuthentication('694318660701967'); //MainAppId
 
     fb.callbackAuthenticated = cbFbAuthenticationCompleted;
 }
@@ -1099,6 +1625,50 @@ function wigo_ws_Controller() {
             view.ShowStatus("Authentication failed.");
         }
     };
+
+    // Uploads to web server a list of record stats items.
+    // An item is replaced if it already exists at server, or is 
+    // created if it does not exist.
+    // Arg:
+    //  nMode: byte value of this.eMode enumeration.
+    //  arStats: array of wigo_ws_GeoTrailRecordStats objs.
+    //  onDone: callback after async completion, signature:
+    //      bOk: boolean: true for sucessful upload.
+    //      sStatus: string: description for the update result.
+    //      Returns: void
+    //  Synchronous return: boolean. true indicates upload successfully started.
+    view.onUploadRecordStatsList = function (nMode, arStats, onDone) {
+        var bStarted = model.uploadRecordStatsList(arStats, onDone)
+        return bStarted;
+    };
+
+    // Deletes at web server a list of record stats items.
+    // Arg:
+    //  nMode: byte value of this.eMode enumeration.
+    //  arTimeStamp: array of wigo_ws_GeoTrailTimeStamp objs. timestamps identifying wigo_ws_GeoTrailRecordStats objs to delete.
+    //  onDone: callback after async completion, signature:
+    //      bOk: boolean: true for sucessful delete.
+    //      sStatus: string: description for the delete result.
+    //      Returns: void
+    //  Synchronous return: boolean. true indicates delete successfully started.
+    view.onDeleteRecordStatsList = function (nMode, arTimeStamp, onDone) {  
+        var bStarted = model.deleteRecordStatsList(arTimeStamp, onDone)
+        return bStarted;
+    };
+
+    // Downloads from web server a list of all the record stats items.
+    // Args:
+    //  nMode: byte value of this.eMode enumeration.
+    //  onDone: callback after async completion, signature:
+    //      bOk: boolean: true for sucessful download.
+    //      arStats: array of wigo_ws_GeoTrailRecordStats objs. the downloaded list.
+    //      sStatus: string. description for the download result.
+    //      Return: void
+    //  Synchronous return: boolean. true indicates upload successfully started.
+    view.onDownloadRecordStatsList = function (nMode, onDone) {
+        var bStarted = model.downloadRecordStatsList(onDone);
+        return bStarted;
+    }
 
     // ** Private members
     var xmlGpx = ""; // xml string from a gpx file.

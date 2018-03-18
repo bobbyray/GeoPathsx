@@ -1,6 +1,6 @@
 ﻿'use strict';
 /* 
-Copyright (c) 2015, 2016 Robert R Schomburg
+Copyright (c) 2015, 2016 - 2018 Robert R Schomburg
 Licensed under terms of the MIT License, which is given at
 https://github.com/bobbyray/MitLicense/releases/tag/v1.0
 */
@@ -192,8 +192,8 @@ function wigo_ws_FaceBookAuthentication(yourAppId) {
             status: false, // check login status (set to false and alway call FB.getLoginStatus(function (response) in Authenticate()
             // to avoid double status changes.
             cookie: true, // enable cookies
-            xfbml: true,  // parse XFBML
-            version    : 'v2.4'  
+            xfbml: true, // parse XFBML
+            version: 'v2.5'    
         });
     }
 

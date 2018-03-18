@@ -1,9 +1,9 @@
-/* 
-Copyright (c) 2015, 2016 Robert R Schomburg
+﻿/* 
+Copyright (c) 2015, 2016, 2018 Robert R Schomburg
 Licensed under terms of the MIT License, which is given at
 https://github.com/bobbyray/MitLicense/releases/tag/v1.0
 */
-
+// Object for web api to access GeoPaths.
 function wigo_ws_GeoPathsRESTfulApi() {
     // ** Public methods.
 
@@ -22,6 +22,7 @@ function wigo_ws_GeoPathsRESTfulApi() {
         else
             onGpxPut = function (bOk, sStatus) { };
 
+        EncodeGpxEl(gpx); // Encode special chars for passthru to server. 
         var bOk = base.Post(eState.GpxPut, sGpxPutUri(ah), gpx);
         return bOk;
     };
@@ -89,20 +90,108 @@ function wigo_ws_GeoPathsRESTfulApi() {
         return bOk;
     };
 
+    //20180225 Add members for Record Stats.
+    // Downloads list of record stats items from server.
+    // Args
+    //  sOwnerId: string for owner id.
+    //  ah: string for access handler for verification of owner.
+    //  OnDone: Asynchronous completion handler. Signature:
+    //      bOk: successful or not.
+    //      arStats [out]: ref to array of wigo_ws_GeoTrailRecordStats objects received.
+    //      sStatus: status message
+    //      Return: void
+    //  Synchronous return: boolean. true indicates download successfully started.
+    this.DownloadRecordStatsList = function (sOwnerId, ah, onDone) {
+        // Save async completion handler.
+        if (typeof (onDone) === 'function')
+            onDownloadRecordStatsList = onDone;
+        else
+            onDownloadRecordStatsList = function (bOk, arStats, sStatus) { };
+        var bOk = base.Get(eState.DownloadRecordStatsList, sDownloadRecordStatsListUri(sOwnerId, ah));
+        return bOk;
+    };
+
+    // Uploads to web server a list of record stats items.
+    // An item is replaced if it already exists at server, or is 
+    // created if it does not exist.
+    // Arg:
+    //  sOwnerId: string for owner id.
+    //  ah: string for access handler for verification of owner.
+    //  arStats: ref to array of wigo_ws_GeoTrailRecordStats objs. the list to upload.
+    //  onDone: Asynchronous completion handler. Signature:
+    //      bOk: boolean: true for sucessful upload.
+    //      sStatus: string: description for the upload result.
+    //      Returns: void
+    //  Synchronous return: boolean. true indicates download successfully started.
+    // Remarks: If a database record already exists and is exactly the same as the arStats element,
+    // the database is not written, only read.
+    // If the arStats element does not exist in the database, it is inserted.
+    this.UploadRecordStatsList = function (sOwnerId, ah, arStats, onDone) {  
+        // Save async completion handler.
+        if (typeof (onDone) === 'function')
+            onUploadRecordStatsList = onDone;
+        else
+            onUploadRecordStatsList = function (bOk, sStatus) { };
+        var bOk = base.Post(eState.UploadRecordStatsList, sUploadRecordStatsListUri(sOwnerId, ah), arStats);
+        return bOk;
+    };
+
+    // Deletes at web server a list of record stats items.
+    // Arg:
+    //  sOwnerId: string for owner id.
+    //  ah: string for access handler for verification of owner.
+    //  arTimeStamp: ref to array of wigo_ws_GeoTrailTimeStamp objs. the list of timestamps identifying the record stats to delete.
+    //  onDone: Asynchronous completion handler. Signature:
+    //      bOk: boolean: true for sucessful deletion.
+    //      sStatus: string: description for the deletion result.
+    //      Returns: void
+    //  Synchronous return: boolean. true indicates delete successfully started.
+    // Remarks: It is not an error if a database record does not exist for an arStats element.
+    this.DeleteRecordStatsList = function (sOwnerId, ah, arTimeStamp, onDone) { 
+        // Save async completion handler.
+        if (typeof (onDone) === 'function')
+            onDeleteRecordStatsList = onDone;
+        else
+            onDeleteRecordStatsList = function (bOk, sStatus) { };
+        var bOk = base.Post(eState.DeleteRecordStatsList, sDeleteRecordStatsListUri(sOwnerId, ah), arTimeStamp);
+        return bOk;
+    }
+
     // Authenticates user with the server.
     // Args 
     //  authData, json {accessToken, userID, userName}
     //      accessToken: string obtained from OAuth (Facebook) server for access token.
     //      userID: string for user ID obtained from OAuth server.
     //      userName: string for user name obtained from OAuth server.
-    //  onDone, callback handler for authentication completed. 
-    //  Handler Signature, json {status, accessHandle, msg}:
-    //      status: integer for status define by this.EAuthStatus.
-    //      accessHandle: string for access handle (user identifier) from GeoPaths server.
-    //      msg: string describing the status.
+    //  onDone, callback handler for authentication completed. Signature:
+    //      result: AuthResult object: {status, accessHandle, userID, userName, msg}.
+    //      See function AuthResult() below for details..
+    //  bNetOnline: boolean, optional. true indicates internet access is available.
+    //              Defaults to true if not given.     
+    //              If false, calls onDone(errorResult):
+    //                  errorResult.error = this.eAuthStatus.Error.
+    //                  errorResult.msg set in indicate internet access is not available.
+    //                  other errorResult fields are defautlts (empty strings).
+    //                  Note: true is returned synchronously indicating that onDone() is called.     
     // Synchronous Return: boolean for successful post to server.
     // Note: OnDone handler called for asynchronous completion. 
-    this.Authenticate = function (authData, onDone) {
+    this.Authenticate = function (authData, onDone, bNetOnline) {
+        // bNetOnline defaults to true if not given.
+        if (typeof(bNetOnline) !== 'boolean') {
+            bNetOnline = true; // Defaults to true.
+        }
+        if (!bNetOnline) { 
+            // Call onDone(..) to indicate internet access is not availble.
+            if (typeof(onDone) === 'function' ) {
+                // errorResult = {userName: _userName, userID: _userID, accessToken: _accessToken, status: nStatus} 
+                var errorResult = new AuthResult();
+                errorResult.status = this.eAuthStatus().Error;
+                errorResult.msg = "Internet access is not available.";
+                onDone(errorResult);
+            }
+            return true; // Note: return true to indicate onDone(..) was called.
+        }
+
         // Save async completion handler.
         if (typeof (onDone) === 'function')
             onAuthenticate = onDone;
@@ -127,13 +216,20 @@ function wigo_ws_GeoPathsRESTfulApi() {
             onLogout = function (bOk) { };
         // Post ajax to geopaths server.
         var bOk = base.Post(eState.Logout, sLogoutUri(), logoutData, onDone);
-    }
+    };
 
-    // Returns enumeration object for sharing state of a record.
+    // Resets flag that indicates http request (get or post) is still in progress.
+    // Note: May be needed if trying to issue subsequent requests fails due to 
+    //       a previous request not completed. 
+    this.ResetRequest = function() {  
+        base.ResetRequest();
+    };
+
+    // Returns ref to enumeration object for sharing state of a record.
     // Returned obj: { public: 0, protected: 1, private: 2 }
     this.eShare = function () { return eShare; };
 
-    // Returns enumeration object for user login status when authorization has completed.
+    // Returns ref to enumeration object for user login status when authorization has completed.
     this.eAuthStatus = function () { return eAuthStatus; };
 
     // Returns ref to enumeration object for sName duplication of Gpx object.
@@ -149,7 +245,8 @@ function wigo_ws_GeoPathsRESTfulApi() {
     var eDuplicate = { NotDup: 0, Match: 1, Renamed: 2, Dup: 3, Error: 4 };
 
     // Enumeration for api transfer state. 
-    var eState = { Initial: 0, GpxPut: 1, GpxGetList: 2, Authenticate: 3, Logout: 4, GpxDelete: 5, GpxGetListByLatLon: 6};
+    var eState = { Initial: 0, GpxPut: 1, GpxGetList: 2, Authenticate: 3, Logout: 4, GpxDelete: 5, GpxGetListByLatLon: 6, 
+                   DownloadRecordStatsList: 7, UploadRecordStatsList: 8, DeleteRecordStatsList: 9}; 
 
     // Enumeration for login status return by OAuth server.
     // Note: same values as for FacebookAuthentication.eAuthResult (keep synced).
@@ -260,6 +357,34 @@ function wigo_ws_GeoPathsRESTfulApi() {
         return s;
     }
 
+    //20180227 addition for record stats
+    // Returns relative URI for UploadRecordStatsList api.
+    // Args:
+    //  sOwnerId: string. owner id for stats.
+    //  ah: string: access handle for server authentication verification.
+    function sUploadRecordStatsListUri(sOwnerId, ah) {
+        var s = "uploadrecordstatslist/{0}?ah={1}".format(sOwnerId, ah);
+        return s;
+    }
+
+    // Returns relative URI for DeleteRecordStatsList api.
+    // Args:
+    //  sOwnerId: string. owner id for stats.
+    //  ah: string: access handle for server authentication verification.
+    function sDeleteRecordStatsListUri(sOwnerId, ah) {  
+        var s = "deleterecordstatslist/{0}?ah={1}".format(sOwnerId, ah);
+        return s;
+    }
+
+    // Returns relative URI for DownloadRecordStatsList api.
+    // Args:
+    //  sOwnerId: string. owner id for stats.
+    //  ah: string: access handle for server authentication verification.
+    function sDownloadRecordStatsListUri(sOwnerId, ah) {
+        var s = "downloadrecordstatslist/{0}?ah={1}".format(sOwnerId, ah);
+        return s;
+    }
+
     // ** Async completion event handlers
     // Note: Initialized to empty handlers.
     //       Caller of api method (GpxPut, GpxGetList, etc.) provides the 
@@ -301,6 +426,28 @@ function wigo_ws_GeoPathsRESTfulApi() {
     //  Returns nothing.
     var onGpxGetListByLatLon = function (bOk, gpxList, sStatus) { };
 
+    // DownloadRecordStatsList has completed asynchronously.
+    // Handler Signature:
+    //      bOk: successful or not.
+    //      arStats [out]: ref to array of wigo_ws_GeoTrailRecordStats objects received.
+    //      sStatus: status message.
+    //      Return: void
+    var onDownloadRecordStatsList = function (bOk, arStats, sStatus) { }; 
+
+    // UploadRecordStatsList has completed asynchronously.
+    // Handler Signature:
+    //      bOk: boolean: true for sucessful upload.
+    //      sStatus: string: description for the upload result.
+    //      Returns: void
+    var onUploadRecordStatsList = function (bOk, sStatus) { };
+
+    // DeleteRecordStatsList has completed asynchronously.
+    // Handler Signature:
+    //      bOk: boolean: true for sucessful delete at server.
+    //      sStatus: string: description for the delete result.
+    //      Returns: void
+    var onDeleteRecordStatsList = function (bOk, sStatus) { };
+
     // Authentication has completed.
     // Handler signature:
     //  status: ref to authentication status received.
@@ -317,16 +464,15 @@ function wigo_ws_GeoPathsRESTfulApi() {
     // Set object for core Ajax funcitons (kind of like a protected base class).
     // Choose base service address for local debug or remote host.
     //var base = new wigo_ws_Ajax("Service.svc/"); // Local debug (works)
-    // var base = new wigo_ws_Ajax("http://localhost:54545/Service.svc/"); // Local debug (works)
+    //var base = new wigo_ws_Ajax("http://localhost:54545/Service.svc/"); // Local debug (works)
     // var base = new wigo_ws_Ajax("http://localhost:63651/Service.svc/"); // Local debug (works)
-    // var base = new wigo_ws_Ajax("http://localhost:51765/Service.svc/"); // Local debug (works)
     //var base = new wigo_ws_Ajax("https://localhost:44301/Service.svc/"); // Local debug https not working!
     //20150808!!!! I cannot get the ajax requests to work locally with the IIS Express Server.
-    //             IIS Express does work locally to get a page (https://localhost:44301/gpxpaths.html), 
-    //             but the ajaxs requests for this api fail if https is used for the apis.
-    //             I think the problem is a configuration problem with IIS Express,
-    //             and that https for the ajax requests may work properly 
-    //             at the (GoDaddy) remote host. For now, not using https for these apis.
+    //         IIS Express does work locally to get a page (https://localhost:44301/gpxpaths.html), 
+    //         but the ajaxs requests for this api fail if https is used for the apis.
+    //         I think the problem is a configuration problem with IIS Express,
+    //         and that https for the ajax requests may work properly 
+    //         at the (GoDaddy) remote host. For now, not using https for these apis.
     var base = new wigo_ws_Ajax("https://www.wigo.ws/geopathsx/Service.svc/"); // Remote host (Would like to try https)
     var bDebugging = typeof (bLocalDebug) === 'boolean' && bLocalDebug;   
     console.log("js/GeoPathsApi2.js bDebugging = " + bDebugging); 
@@ -358,6 +504,7 @@ function wigo_ws_GeoPathsRESTfulApi() {
                 if (bOk) {
                     if (req && req.readyState == 4 && req.status === 200) {
                         gpxList = JSON.parse(req.responseText);
+                        DecodeGpxList(gpxList);  
                         sStatus = "GpxGetList succeeded.";
                     } else {
                         gpxList = new Array();
@@ -367,7 +514,7 @@ function wigo_ws_GeoPathsRESTfulApi() {
                     sStatus = base.FormCompletionStatus(req);
                     gpxList = new Array();
                     if (req && req.readyState == 4 && req.status === 403) { 
-                        sStatus = "Authentication failed. Log out and Sign In again because authorization has probably expired.";
+                        sStatus = "Authentication failed. Sign In again because authorization has probably expired.";
                     }
                 }
                 onGpxGetList(bOk, gpxList, sStatus);
@@ -377,6 +524,7 @@ function wigo_ws_GeoPathsRESTfulApi() {
                 if (bOk) {
                     if (req && req.readyState == 4 && req.status === 200) {
                         gpxList = JSON.parse(req.responseText);
+                        DecodeGpxList(gpxList);  
                         sStatus = "GpxGetListByLatLon succeeded.";
                     } else {
                         gpxList = new Array();
@@ -386,7 +534,7 @@ function wigo_ws_GeoPathsRESTfulApi() {
                     sStatus = base.FormCompletionStatus(req);
                     gpxList = new Array();
                     if (req && req.readyState == 4 && req.status === 403) {
-                        sStatus = "Authentication failed. Log out and Sign In again because authorization has probably expired.";
+                        sStatus = "Authentication failed. Sign In again because authorization has probably expired.";
                     }
                 }
                 onGpxGetListByLatLon(bOk, gpxList, sStatus);
@@ -409,8 +557,94 @@ function wigo_ws_GeoPathsRESTfulApi() {
             case eState.Logout:
                 var sLogoutMsg = base.FormCompletionStatus(req);
                 onLogout(bOk, sLogoutMsg);
+
+            case eState.UploadRecordStatsList:  
+                if (bOk)
+                    sStatus = "UploadRecordStatsList succeeded."
+                else
+                    sStatus = base.FormCompletionStatus(req);
+                onUploadRecordStatsList(bOk, sStatus);
+                break;
+            case eState.DeleteRecordStatsList:  
+                if (bOk)
+                    sStatus = "DeleteRecordStatsList succeeded";
+                else
+                    sStatus = base.FormCompletionStatus(req);
+                onDeleteRecordStatsList(bOk, sStatus);
+                break;
+            case eState.DownloadRecordStatsList: 
+                var arStats;
+                if (bOk) {
+                    if (req && req.readyState == 4 && req.status === 200) {
+                        arStats = JSON.parse(req.responseText);
+                        sStatus = "DownloadRecordStatsList succeeded.";
+                    } else {
+                        arStats = [];
+                        sStatus = "Invalid response received for DownloadRecordStatsList."
+                    }
+                } else {
+                    sStatus = base.FormCompletionStatus(req);
+                    arStats = [];
+                    if (req && req.readyState == 4 && req.status === 403) {
+                        sStatus = "Authentication failed. Sign In again because authorization has probably expired.";
+                    }
+                }
+                onDownloadRecordStatsList(bOk, arStats, sStatus)
+                break;
         }
     };
+
+    // Object to encode / decode chars that need to passthru transfer with web server.
+    // Attribution: Stackover question: http://stackoverflow.com/questions/1219860/html-encoding-lost-when-attribute-read-from-input-field
+    // Note: For this api, only single quote char and double quote char need to be translated to passthru.
+    function PassThru() { 
+        // Returns text with special chars replaced with corresponding html entity sequence.
+        // Arg:
+        //  str: string. plain text that may contain special characters the need to be encoded
+        //               in order to pass through to web server.
+        this.encode = function(str) {
+            return str
+                    // .replace(/&/g, '&amp;')  // Not needed.
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;')
+                    // .replace(/</g, '&lt;')  // Not needed
+                    // .replace(/>/g, '&gt;'); // Not needed.
+                    };
+
+        this.decode = function(str) {
+            return str
+                    .replace(/&quot;/g, '"')
+                    .replace(/&#39;/g, "'")
+                    // .replace(/&lt;/g, '<')  // Not needed
+                    // .replace(/&gt;/g, '>')  // Not needed
+                    //.replace(/&amp;/g, '&')  // Not needed
+                    ;            
+        };
+    }
+    var passThru = new PassThru(); 
+
+    // Helper to encode gpx element for passthru.
+    // Arg:
+    //  gpxEl: wigo_ws_Gpx obj. ref to element to encode.
+    function EncodeGpxEl(gpxEl) {  
+        gpxEl.sName = passThru.encode(gpxEl.sName); 
+    }
+
+    // Helper to decode gpx element for passthru.
+    // Arg:
+    //  gpxEl: wigo_ws_Gpx obj. ref to element to decode.
+    function DecodeGpxEl(gpxEl) {
+        gpxEl.sName = passThru.decode(gpxEl.sName);
+    }
+
+    // Helper to decode gpx elements for passthru.
+    // Arg:
+    //  gpxList: array of wigo_ws_Gpx objs. ref to elements to decode.
+    function DecodeGpxList(gpxList) {  
+        for (var i=0; i < gpxList.length; i++) {
+            DecodeGpxEl(gpxList[i]);
+        }
+    }
 }
 
 // Objects for wigo_ws_GeoPaths
@@ -689,5 +923,29 @@ wigo_ws_GpxPath.AttachFcns = function (me) {
     };
     // May want to attach Parse(xmlData) also, but not needed now.
 };
+
+// wigo_ws_GeoTrailRecordStats in Model.js is object exchanged with 
+// for stats for a recorded trail. 
+// JavaScript Object                    Server Object
+// wigo_ws_GeoTrailRecordStats          GeoTrailRecordStats
+// [] of wigo_ws_GeoTrailRecordStats    GeoTrailRecordStatsList
+
+// Object for exchanging with server statistics for a trail that has been recorded. 
+// Note: Also used by Model2.js to save to localStorage.
+function wigo_ws_GeoTrailRecordStats() {
+    this.nTimeStamp = 0; // integer. Time value of javascript Date object as an integer. Creation timesamp.
+    this.msRunTime = 0;  // number. Run time for the recorded path in milliseconds.
+    this.mDistance = 0;  // number. Distance of path in meters.
+    this.caloriesKinetic = 0;      // number. Kinetic engery in calories to move body mass along the path.
+    this.caloriesBurnedCalc = 0;   // number. Calories burned calculated by the GeoTrail app.
+    //20180215 this.caloriesBurnedActual = 0; // Removed. 
+}
+
+// Object for exchanging with server a timestamp.
+function wigo_ws_GeoTrailTimeStamp(nTimeStamp) {
+    this.nTimeStamp = 0; // integer for Date value in milliseconds.
+    if (typeof nTimeStamp === 'number')
+        this.nTimeStamp = nTimeStamp;
+}
 
 

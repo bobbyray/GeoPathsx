@@ -1,5 +1,5 @@
 ﻿/* 
-Copyright (c) 2015 - 2017 Robert R Schomburg
+Copyright (c) 2015 - 2018 Robert R Schomburg
 Licensed under terms of the MIT License, which is given at
 https://github.com/bobbyray/MitLicense/releases/tag/v1.0
 */
@@ -454,7 +454,160 @@ public class DbMySqlAccess : IDbAccess
         return result;
     }
 
+    /* //20180226 addition for Record Stats */
 
+    /// <summary>
+    /// Stores list of GeoTrailRecordStats object in database.
+    /// Returns result of database access.
+    /// </summary>
+    /// <param name="sOwnerId">Owner id to identify to whom the stats belong.</param>
+    /// <param name="statsList">List of stats objects to store in database.</param>
+    /// <param name="bOverWrite">true to always replace stats in database even if stats element in statsList is same as database record.</param>
+    /// <returns></returns>
+    public DbResult UploadRecordStatsList(string sOwnerId, GeoTrailRecordStatsList statsList, bool bOverWrite = false)
+    {
+        DbResult result = new DbResult();
+        if (conn == null)
+        {
+            SetError(result, DbResult.EResult.CONNECTION_INACTIVE);
+        }
+        else
+        {
+            RecordStatsRec rec = new RecordStatsRec();
+            GeoTrailRecordStats stats;
+            MySqlTableAccess.EOpResult opResult;
+            for (int i = 0; i < statsList.Count; i++)
+            {
+                stats = statsList[i];
+                opResult = rec.SelectByTimeStamp(conn, sOwnerId, stats.nTimeStamp);
+                if (opResult == MySqlTableAccess.EOpResult.SUCEEDED)
+                {
+                    if (bOverWrite)
+                    {
+                        rec.Set(sOwnerId, statsList[i]);
+                        opResult = rec.Update(conn);
+
+                    }
+                    else
+                    {
+                        // Check if stats are unchanged. 
+                        if (!rec.IsSame(stats))
+                        {
+                            // Only update when stats is different than rec.
+                            rec.Set(sOwnerId, statsList[i]);
+                            opResult = rec.Update(conn);
+                        }
+                        
+                    }
+                    if (opResult != MySqlTableAccess.EOpResult.SUCEEDED)
+                    {
+                        result.SetError(DbResult.EResult.UPDATE_FAILED);
+                    }
+                }
+                else if (opResult == MySqlTableAccess.EOpResult.NOT_FOUND)
+                {
+                    rec.Set(sOwnerId, statsList[i]);
+                    opResult = rec.Insert(conn);
+                    if (opResult != MySqlTableAccess.EOpResult.SUCEEDED)
+                    {
+                        result.SetError(DbResult.EResult.INSERT_FAILED);
+                    }
+                }
+                else
+                {
+                    result.SetError(DbResult.EResult.ERROR);
+                }
+            }
+        }
+        return result;
+    }
+
+    /// <summary>
+    /// Gets a list of GeoTrailRecordStats objects found in database.
+    /// Returns result of of database access.
+    /// </summary>
+    /// <param name="sOwnerId">Id of owner of Gpx records in database.
+    /// If null, any owner record is valid to included.</param>
+    /// <param name="list">Ref to list [out] that is filled from database.</param>
+    /// <returns></returns>
+    public DbResult DownloadRecordStatsList(string sOwnerId, GeoTrailRecordStatsList list) 
+    {
+        DbResult result = new DbResult();
+        // Ensure output list is empty before filling it.
+        list.Clear();
+
+        if (conn == null)
+        {
+            SetError(result, DbResult.EResult.CONNECTION_INACTIVE);
+        }
+        else
+        {
+            // Find list of record in database.
+            RecordStatsRec rec = new RecordStatsRec();
+            List<MySqlTableAccess> liFound = new List<MySqlTableAccess>();
+            string sExpr = String.Format("sOwnerId = '{0}'", sOwnerId);
+            MySqlTableAccess.EOpResult opResult = rec.SelectByExpr(conn, sExpr, liFound);
+            // Fill list of GeoTrailRecordStats elements to return.
+            foreach (MySqlTableAccess recFound in liFound)
+            {
+                RecordStatsRec elFound = recFound as RecordStatsRec; // Element to add to output list.
+                if (elFound == null)
+                {
+                    // Cast failed. Should not happen, code error.
+                    result.SetError(DbResult.EResult.ERROR, "RecordStatsRec in database cast incorrectly.");
+                    break;
+                }
+                list.Add(elFound.ToStatsObj()); 
+            }
+        }
+        return result;
+    }
+
+    /// <summary>
+    /// Deletes a list GeoTrailRecordStats object found in database.
+    /// Returns result of database access.
+    /// </summary>
+    /// <param name="sOwnerId">Id of owner of stats records</param>
+    /// <param name="timestampList">List of timestamps identifying stats records to delete.</param>
+    /// <returns></returns>
+    public DbResult DeleteRecordStatsList(string sOwnerId, GeoTrailTimeStampList timestampList)  
+    {
+        DbResult result = new DbResult();
+        if (conn == null)
+        {
+            SetError(result, DbResult.EResult.CONNECTION_INACTIVE);
+        }
+        else
+        {
+            RecordStatsRec rec = new RecordStatsRec();
+            MySqlTableAccess.EOpResult opResult;
+            for (int i = 0; i < timestampList.Count; i++)
+            {
+                opResult = rec.SelectByTimeStamp(conn, sOwnerId, timestampList[i].nTimeStamp);
+                if (opResult == MySqlTableAccess.EOpResult.SUCEEDED)
+                {
+                    opResult = rec.Delete(conn);
+
+                    if (opResult != MySqlTableAccess.EOpResult.SUCEEDED)
+                    {
+                        result.SetError(DbResult.EResult.DELETE_FAILED);
+                        break; // Quit on error.
+                    }
+                }
+                else if (opResult == MySqlTableAccess.EOpResult.NOT_FOUND)
+                {
+                    ; // Ok, nothing to delete.
+                }
+                else
+                {
+                    result.SetError(DbResult.EResult.ERROR);
+                    break; // Quit on error.
+                }
+            }
+        }
+        return result;
+    }
+    
 
     // ** Other Members 
     protected MySqlConnection conn = null; // Active connection to mysql database.
@@ -1030,6 +1183,9 @@ public class GeoPathRec : MySqlTableAccess
 
 }
 
+/// <summary>
+/// Record for owner table.
+/// </summary>
 public class OwnerRec  : MySqlTableAccess
 {
     /// <summary>
@@ -1256,6 +1412,280 @@ public class OwnerRec  : MySqlTableAccess
 
     protected const string sTABLE_NAME = "owner";
 
+}
+
+/* //20180226 add record for recordstats table */
+
+/// <summary>
+/// Record for MySql recordstats record.
+/// </summary>
+public class RecordStatsRec : MySqlTableAccess
+{
+    /// <summary>
+    /// Database sequence number at server. 0 indicates new.
+    /// </summary>
+    public int nId = 0;
+
+    /// <summary>
+    /// Owner id for the stats record.
+    /// </summary>
+     public string sOwnerId
+    {
+        get { return _sOwnerId; }
+        set { _sOwnerId = value; }
+    }
+    string _sOwnerId = "";
+
+    /// <summary>
+    /// Time value of javascript Date object as an integer. Creation timesamp.
+    /// </summary>
+    public long nTimeStamp = 0;
+
+    /// <summary>
+    /// Run time for the recorded path in milliseconds.
+    /// </summary>
+    public double msRunTime = 0;
+
+    /// <summary>
+    /// Distance of path in meters.
+    /// </summary>
+    public double mDistance = 0;
+
+    /// <summary>
+    /// Kinetic engery in calories to move body mass along the path.
+    /// </summary>
+    public double caloriesKinetic = 0;
+
+    /// <summary>
+    /// Calories burned calculated by the GeoTrail app.
+    /// </summary>
+    public double caloriesBurnedCalc = 0;
+
+
+    // ** Other Methods 
+
+    /// <summary>
+    /// Set record stats in this object.
+    /// </summary>
+    /// <param name="sOwnerId">owner id for the stats.</param>
+    /// <param name="stats">The stats being assigned to this object.</param>
+    /// <remarks>GeoTrailRecordStats is exchanged with server as json.</remarks>
+    public void Set(string sOwnerId, GeoTrailRecordStats stats) {
+        this.sOwnerId = sOwnerId;
+        this.nTimeStamp = stats.nTimeStamp;
+        this.msRunTime = stats.msRunTime;
+        this.mDistance = stats.mDistance;
+        this.caloriesKinetic = stats.caloriesKinetic;
+        this.caloriesBurnedCalc = stats.caloriesBurnedCalc;
+    }
+
+    /// <summary>
+    /// Returns true if stats are the same as in this object. 
+    /// </summary>
+    /// <param name="stats">stats to compare with this object.</param>
+    /// <returns></returns>
+    public bool IsSame(GeoTrailRecordStats stats)
+    {
+        bool bSame = this.nTimeStamp == stats.nTimeStamp &&
+                     this.msRunTime == stats.msRunTime &&
+                     this.mDistance == stats.mDistance &&
+                     this.caloriesKinetic == stats.caloriesKinetic &&
+                     this.caloriesBurnedCalc == stats.caloriesBurnedCalc;
+        return bSame;
+    }
+
+
+    // 
+    /// <summary>
+    /// Fills this object from database for specified owner id and timestamp.
+    /// </summary>
+    /// <param name="conn">Active database connection.</param>
+    /// <param name="sOwnerId">Specified owner id.</param>
+    /// <param name="nTimeStamp">Timestamp uniquely identifying the record.</param>
+    /// <returns></returns>
+    /// <remarks>
+    /// If record is not found for the specified owner id, this object is
+    /// initialized to same state as when selected.
+    /// </remarks>
+    public EOpResult SelectByTimeStamp(MySqlConnection conn, string sOwnerId, long nTimeStamp)
+    {
+        bool bError = false;
+        List<MySqlTableAccess> liResult = new List<MySqlTableAccess>();
+        string sExpr = String.Format("sOwnerId = '{0}' and nTimeStamp = '{1}'", sOwnerId, nTimeStamp);
+        EOpResult result = this.SelectByExpr(conn, sExpr, liResult);
+        if (result == EOpResult.SUCEEDED && liResult.Count > 0)
+        {
+            RecordStatsRec found = liResult[0] as RecordStatsRec;
+            if (found != null)
+                Copy(found);
+            else
+                bError = true;
+        }
+        else
+        {
+            bError = true;
+        }
+        if (bError)
+        {
+            if (result == EOpResult.SUCEEDED)
+            {
+                result = EOpResult.NOT_FOUND;
+            }
+            Init(); // Initialize this record on error.
+        }
+        return result;
+    }
+
+    /// <summary>
+    /// Returns a new GeoTrailRecordStats object formed from this record.
+    /// </summary>
+    /// <returns></returns>
+    public GeoTrailRecordStats ToStatsObj()  
+    {
+        GeoTrailRecordStats stats = new GeoTrailRecordStats();
+        stats.nTimeStamp = this.nTimeStamp;
+        stats.mDistance = this.mDistance;
+        stats.msRunTime = this.msRunTime;
+        stats.caloriesKinetic = this.caloriesKinetic;
+        stats.caloriesBurnedCalc = this.caloriesBurnedCalc;
+        return stats;
+    }
+
+    // ** Private Members
+    /// <summary>
+    /// Copies other RecordStatsRec to this object.
+    /// </summary>
+    /// <param name="other">other record to copy.</param>
+    private void Copy(RecordStatsRec other)
+    {
+        this.nId = other.nId;
+        this.sOwnerId = other.sOwnerId;
+        this.nTimeStamp = other.nTimeStamp;
+        this.msRunTime = other.msRunTime;
+        this.mDistance = other.mDistance;
+        this.caloriesKinetic = other.caloriesKinetic;
+        this.caloriesBurnedCalc = other.caloriesBurnedCalc;
+    }
+
+    /// <summary>
+    /// Initializes this record to same state as when constructed.
+    /// </summary>
+    private void Init()
+    {
+        this.nId = 0;
+        this.sOwnerId = "";
+        this.nTimeStamp = 0;
+        this.msRunTime = 0;
+        this.mDistance = 0;
+        this.caloriesKinetic = 0;
+        this.caloriesBurnedCalc = 0;
+    }
+
+    // ** Specific field information that a derived class provides.
+    // Derived class must add record type to table type map by calling MySqlTableAccess.AddTableTypeToMap(string sTableName, Type typeof(class_name)) 
+
+    /// <summary>
+    /// Readonly property for name of the table.
+    /// </summary>
+    override public string TableName
+    {
+        get { return sTABLE_NAME; }
+    }
+
+    /// <summary>
+    /// Read/Write property for the identity field of the record.
+    /// </summary>
+    override public int IdSq
+    {
+        get { return this.nId; }
+        set { this.nId = value; }
+    }
+
+    /// <summary>
+    /// Readonly property for column name of IdSq field.
+    /// </summary>
+    override public string IdName
+    {
+        get { return "nId"; }
+    }
+
+    /// <summary>
+    /// Indexer of a column value within this object.
+    /// Returns object value for column i. 
+    /// Returns null if column i index is out of range.
+    /// </summary>
+    /// <param name="iCol">Index for column value, origin 0.</param>
+    /// <returns></returns>
+    override protected Column this[int iCol]
+    {
+        get
+        {
+            Column oCol = new Column();
+            switch (iCol)
+            {
+                case 0: oCol.oValue = nId; oCol.sName = "nId"; oCol.oType = typeof(int); break;
+                case 1: oCol.oValue = sOwnerId; oCol.sName = "sOwnerId"; oCol.oType = typeof(string); break;
+                case 2: oCol.oValue = nTimeStamp; oCol.sName = "nTimeStamp"; oCol.oType = typeof(long); break;
+                case 3: oCol.oValue = msRunTime; oCol.sName = "msRunTime"; oCol.oType = typeof(double); break;
+                case 4: oCol.oValue = mDistance; oCol.sName = "mDistance"; oCol.oType = typeof(double); break;
+                case 5: oCol.oValue = caloriesKinetic; oCol.sName = "caloriesKinetic"; oCol.oType = typeof(double); break;
+                case 6: oCol.oValue = caloriesBurnedCalc; oCol.sName = "caloriesBurnedCalc"; oCol.oType = typeof(double); break;
+                default:
+                    oCol = null;
+                    break;
+            }
+            return oCol;
+        }
+
+        set
+        {
+            switch (iCol)
+            {
+                case 0: nId = (int)value.oValue; break;
+                case 1: sOwnerId = (string)value.oValue; break;
+                case 2: nTimeStamp = (long)value.oValue; break;
+                case 3: msRunTime = (double)value.oValue; break;
+                case 4: mDistance = (double)value.oValue; break;
+                case 5: caloriesKinetic = (double)value.oValue; break;
+                case 6: caloriesBurnedCalc = (double)value.oValue; break;
+            }
+        }
+    }
+
+    // No ovrride.
+    // virtual protected string ColumnValue(int iCol, out MySqlParameter oParam)
+    // virtual protected bool ReadColumn(int iCol, MySqlDataReader r)
+
+    /// <summary>
+    /// Returns a new record object of the derived class.
+    /// Note: This useful for getting a working obj that does 
+    ///       not disturb this ojbject.
+    /// </summary>
+    /// <returns></returns>
+    override protected MySqlTableAccess New()
+    {
+        return new RecordStatsRec();
+    }
+
+    /// <summary>
+    /// Sets foreign key map needed by HistRec to save change history.
+    /// </summary>
+    override public void SetForeignKeyMap()
+    {
+        // No foreign keys.
+        mapForeignKey.Clear();
+    }
+
+    /// Readonly property that indicates if change history
+    /// is saved when database record is changed. 
+    /// OwnerRec's are not saved in the hist table.
+    /// </summary>
+    protected override bool bSaveHistory
+    {
+        get { return false; }
+    }
+
+    protected const string sTABLE_NAME = "recordstats";
 }
 
 

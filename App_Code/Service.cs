@@ -1,5 +1,5 @@
 ﻿/* 
-Copyright (c) 2015 - 2017 Robert R Schomburg
+Copyright (c) 2015 - 2018 Robert R Schomburg
 Licensed under terms of the MIT License, which is given at
 https://github.com/bobbyray/MitLicense/releases/tag/v1.0
 */
@@ -290,7 +290,130 @@ public class Service
         return dbResult.sMsg;
     }
 
-    
+    /// <summary>
+    /// Uploads a list of GeoTrailRecordStats elements to the database.
+    /// </summary>
+    /// <param name="sOwnerId">owner id of gpx records.</param>
+    /// <param name="sShare">Type of sharing with other owners allowed.</param>
+    /// <returns></returns>
+    /// <remarks>
+    /// The http request status code:
+    ///     200 for ok.
+    ///     403 for forbidden, authentication failed.
+    ///     500 for internal server error, database access error.
+    /// </remarks>
+    [OperationContract]  
+    [WebInvoke(Method = "POST", RequestFormat = WebMessageFormat.Xml, ResponseFormat = WebMessageFormat.Json, UriTemplate = "uploadrecordstatslist/{sOwnerId}?ah={accessHandle}")]
+    public string UploadRecordStatsList(GeoTrailRecordStatsList statsList, string sOwnerId, string accessHandle)
+    {
+        IDbAccess acc = MyDbAccess.Get();
+        DoConnectionCallback oCode = delegate()
+        {
+            DbResult oResult = acc.ValidateAccess(sOwnerId, accessHandle);
+            if (oResult.bOk)
+            {
+                acc.UploadRecordStatsList(sOwnerId, statsList);
+            }
+            return oResult;
+        };
+        DbResult result = acc.DoConnection(oCode);
+
+        if (!result.bOk)
+        {
+            WebOperationContext.Current.OutgoingResponse.StatusCode = System.Net.HttpStatusCode.InternalServerError;
+        }
+
+        return result.sMsg;
+    }
+
+
+
+    /// <summary>
+    /// Uploads a list of GeoTrailRecordStats elements to the database.
+    /// </summary>
+    /// <param name="sOwnerId">owner id of gpx records.</param>
+    /// <param name="sShare">Type of sharing with other owners allowed.</param>
+    /// <returns></returns>
+    /// <remarks>
+    /// The http request status code:
+    ///     200 for ok.
+    ///     403 for forbidden, authentication failed.
+    ///     500 for internal server error, database access error.
+    /// </remarks>
+    [OperationContract]
+    [WebInvoke(Method = "POST", RequestFormat = WebMessageFormat.Xml, ResponseFormat = WebMessageFormat.Json, UriTemplate = "deleterecordstatslist/{sOwnerId}?ah={accessHandle}")]
+    public string DeleteRecordStatsList(GeoTrailTimeStampList timestampList, string sOwnerId, string accessHandle)
+    {
+        IDbAccess acc = MyDbAccess.Get();
+        DoConnectionCallback oCode = delegate()
+        {
+            DbResult oResult = acc.ValidateAccess(sOwnerId, accessHandle);
+            if (oResult.bOk)
+            {
+                acc.DeleteRecordStatsList(sOwnerId, timestampList);
+            }
+            return oResult;
+        };
+        DbResult result = acc.DoConnection(oCode);
+
+        if (!result.bOk)
+        {
+            WebOperationContext.Current.OutgoingResponse.StatusCode = System.Net.HttpStatusCode.InternalServerError;
+        }
+
+        return result.sMsg;
+    }
+
+
+
+
+
+    /// <summary>
+    /// Gets a list of Gpx records from the database.
+    /// </summary>
+    /// <param name="sOwnerId">owner id of gpx records.</param>
+    /// <param name="sShare">Type of sharing with other owners allowed.</param>
+    /// <returns></returns>
+    /// <remarks>
+    /// The http request status code:
+    ///     200 for ok.
+    ///     403 for forbidden, authentication failed.
+    ///     500 for internal server error, database access error.
+    /// </remarks>
+    [OperationContract]
+    [WebInvoke(Method = "GET", ResponseFormat = WebMessageFormat.Json, UriTemplate = "downloadrecordstatslist/{sOwnerId}?ah={accessHandle}")]
+    public GeoTrailRecordStatsList DownloadRecordStatsList(string sOwnerId, string accessHandle)
+    {
+        GeoTrailRecordStatsList list = new GeoTrailRecordStatsList();
+        System.Net.HttpStatusCode httpStatusError = System.Net.HttpStatusCode.InternalServerError;
+
+        IDbAccess acc = MyDbAccess.Get();
+        DoConnectionCallback oCode = delegate()
+        {
+            DbResult oResult = acc.ValidateAccess(sOwnerId, accessHandle);
+            if (oResult.nResult == DbResult.EResult.ERROR)
+                httpStatusError = System.Net.HttpStatusCode.Forbidden;
+            if (oResult.bOk)
+            {
+                oResult = acc.DownloadRecordStatsList(sOwnerId, list);
+            }
+
+            return oResult;
+        };
+        DbResult result = acc.DoConnection(oCode);
+
+        if (!result.bOk)
+        {
+            WebOperationContext.Current.OutgoingResponse.StatusCode = httpStatusError;
+        }
+
+        return list;
+    }
+
+
+
+
+
     // Add more operations here and mark them with [OperationContract]
 
 }
@@ -326,7 +449,7 @@ public class MyDbAccess
 public class Gpx 
 {
     /// <summary>
-    /// Returns true is sOwnerId have a value that indicates any owner.
+    /// Returns true if sOwnerId have a value that indicates any owner.
     /// </summary>
     /// <param name="sOwnerId">Owner id to check.</param>
     /// <returns></returns>
@@ -548,10 +671,9 @@ public class GeoPt
 /// </summary>
 /// <remarks>
 /// Base List is serialized to json array.
-/// Note: Serialization fails if data members are added to GpxList.
-/// Instead form a class with [DataContract] attribute which has a data member of 
-/// of type GpxList (this class) with attribute of [DataContract]
-/// (the attribute of the data member is NOT [CollectionDataContract]).
+/// Note: Serialization would fail if data members were added to GpxList.
+/// Instead form a class with [DataContract] attribute which has data members for 
+/// the template type of GpxList (Gpx in this case) with attribute of [DataContract].
 /// </remarks>
 [CollectionDataContract]
 public class GpxList : List<Gpx>
@@ -628,7 +750,6 @@ public class LogoutData
     
 }
 
-
 /// <summary>
 /// Result for verifying authentication serialized to json.
 /// </summary>
@@ -687,3 +808,113 @@ public class AuthResult
     }
     string _msg = String.Empty;
 }
+
+/* //20180226 **** additions for Stats for Geotrail Recorded Trail.*/
+
+/// <summary>
+/// Stats for Geotrail Recorded Trail.
+/// </summary>
+[DataContract]
+public class GeoTrailRecordStats
+{
+    /// <summary>
+    /// Time value of javascript Date object as an integer. Creation timesamp.
+    [DataMember]
+    /// </summary>
+    public long nTimeStamp
+    {
+        get { return _nTimeStamp; }
+        set { _nTimeStamp = value; }
+    }
+    long _nTimeStamp = 0;
+
+    /// <summary>
+    /// Run time for the recorded path in milliseconds.
+    /// </summary>
+    [DataMember]
+    public double msRunTime
+    {
+        get {return _msRunTime;}
+        set { _msRunTime = value; }
+    }
+    double _msRunTime = 0;
+
+    /// <summary>
+    /// Distance of path in meters.
+    /// </summary>
+    [DataMember]
+    public double mDistance
+    {
+        get { return _mDistance; }
+        set { _mDistance = value; }
+    }
+    double _mDistance = 0;
+
+    /// <summary>
+    /// Kinetic engery in calories to move body mass along the path.
+    /// </summary>
+    [DataMember]
+    public double caloriesKinetic
+    {
+        get { return _caloriesKinetic; }
+        set { _caloriesKinetic = value; }
+    }
+    double _caloriesKinetic = 0;
+
+    /// <summary>
+    /// Calories burned calculated by the GeoTrail app.
+    /// </summary>
+    [DataMember]
+    public double caloriesBurnedCalc
+    {
+        get { return _caloriesBurnedCalc; }
+        set { _caloriesBurnedCalc = value; }
+    }
+    double _caloriesBurnedCalc = 0;
+}
+
+/// <summary>
+/// Timestamp for a GeoTrail Recorded Trail.
+/// </summary>
+[DataContract]
+public class GeoTrailTimeStamp
+{
+    /// <summary>
+    /// Time stamp in milliseconds for a data object.
+    /// </summary>
+    [DataMember]
+    public long nTimeStamp
+    {
+        get { return _nTimeStamp; }
+        set { _nTimeStamp = value; }
+    }
+    long _nTimeStamp = 0;
+}
+
+/// <summary>
+/// Json array for list of timestamps of GeoTrailRecordStats objects to be deleted 
+/// from server.
+/// </summary>
+[CollectionDataContract]
+public class GeoTrailTimeStampList : List<GeoTrailTimeStamp>
+{
+    public GeoTrailTimeStampList() {}
+    public GeoTrailTimeStampList(List<GeoTrailTimeStamp> list) : base(list) { }
+}
+
+/// <summary>
+/// Json array for list of Gpx elements.
+/// </summary>
+/// <remarks>
+/// Base List is serialized to json array.
+/// Note: Serialization would fail if data members were added to GeoTrailRecordStatsList.
+/// Instead form a class with [DataContract] attribute which has data members for 
+/// the template type of GeoTrailRecordStatsList (GeoTrailRecordStats in this case) with attribute of [DataContract].
+/// </remarks>
+[CollectionDataContract]
+public class GeoTrailRecordStatsList : List<GeoTrailRecordStats>
+{
+    public GeoTrailRecordStatsList() { }
+    public GeoTrailRecordStatsList(List<GeoTrailRecordStats> list) : base(list) { }
+}
+
