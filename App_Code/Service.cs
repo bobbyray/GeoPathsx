@@ -81,7 +81,7 @@ public class Service
     /// Deletes record for gpx data from database.
     /// </summary>
     /// <param name="sOwnerId">The owner id of the record to delete.</param>
-    /// <param name="sId">The unique record id for the data record to delete. 
+    /// <param name="gpxId">The unique record id and owner id for the gpx data record to delete. 
     /// <param name="accessHandle">Access handle to validate deletion.</param>
     /// <returns></returns>
     [OperationContract]  
