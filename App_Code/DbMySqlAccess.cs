@@ -546,7 +546,7 @@ public class DbMySqlAccess : IDbAccess
             RecordStatsRec rec = new RecordStatsRec();
             List<MySqlTableAccess> liFound = new List<MySqlTableAccess>();
             string sExpr = String.Format("sOwnerId = '{0}'", sOwnerId);
-            MySqlTableAccess.EOpResult opResult = rec.SelectByExpr(conn, sExpr, "nTimeStamp", liFound); //20180320 added arg "nTimeStamp DECS"  to sort ascending by timestamp.
+            MySqlTableAccess.EOpResult opResult = rec.SelectByExpr(conn, sExpr, "nTimeStamp", liFound); //20180320 added arg "nTimeStamp"  to sort ascending by timestamp.
             // Fill list of GeoTrailRecordStats elements to return.
             foreach (MySqlTableAccess recFound in liFound)
             {
