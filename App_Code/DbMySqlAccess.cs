@@ -528,7 +528,7 @@ public class DbMySqlAccess : IDbAccess
     /// </summary>
     /// <param name="sOwnerId">Id of owner of Gpx records in database.
     /// If null, any owner record is valid to included.</param>
-    /// <param name="list">Ref to list [out] that is filled from database.</param>
+    /// <param name="list">Ref to list [out] that is filled from database. List is sorted in ascending order by nTimeStamp.</param>
     /// <returns></returns>
     public DbResult DownloadRecordStatsList(string sOwnerId, GeoTrailRecordStatsList list) 
     {
@@ -546,7 +546,7 @@ public class DbMySqlAccess : IDbAccess
             RecordStatsRec rec = new RecordStatsRec();
             List<MySqlTableAccess> liFound = new List<MySqlTableAccess>();
             string sExpr = String.Format("sOwnerId = '{0}'", sOwnerId);
-            MySqlTableAccess.EOpResult opResult = rec.SelectByExpr(conn, sExpr, liFound);
+            MySqlTableAccess.EOpResult opResult = rec.SelectByExpr(conn, sExpr, "nTimeStamp", liFound); //20180320 added arg "nTimeStamp DECS"  to sort ascending by timestamp.
             // Fill list of GeoTrailRecordStats elements to return.
             foreach (MySqlTableAccess recFound in liFound)
             {
