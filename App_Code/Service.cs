@@ -51,6 +51,7 @@ public class Service
     /// </summary>
     /// <param name="gpx">The data to be stored. 
     /// For gpx.nId == 0, a new record is created, otherwise existing record is updated.</param>
+    /// <param name="accessHandle">access handle to validate authentication.</param>
     /// <returns></returns>
     [OperationContract]
     [WebInvoke(Method = "POST", RequestFormat = WebMessageFormat.Xml, ResponseFormat = WebMessageFormat.Json, UriTemplate = "gpxput?ah={accessHandle}")]
@@ -115,6 +116,7 @@ public class Service
     /// </summary>
     /// <param name="sOwnerId">owner id of gpx records.</param>
     /// <param name="sShare">Type of sharing with other owners allowed.</param>
+    /// <param name="accessHandle">access handle to validate authentication.</param>
     /// <returns></returns>
     /// <remarks>
     /// The http request status code:
@@ -165,6 +167,7 @@ public class Service
     /// </summary>
     /// <param name="sOwnerId">owner id of gpx records.</param>
     /// <param name="sShare">Type of sharing with other owners allowed.</param>
+    /// <param name="accessHandle">access handle to validate authentication.</param>
     /// <returns></returns>
     /// <remarks>
     /// The http request status code:
@@ -291,10 +294,11 @@ public class Service
     }
 
     /// <summary>
-    /// Uploads a list of GeoTrailRecordStats elements to the database.
+    /// Uploads a list of GeoTrailRecordStats items to the database.
     /// </summary>
-    /// <param name="sOwnerId">owner id of gpx records.</param>
-    /// <param name="sShare">Type of sharing with other owners allowed.</param>
+    /// <param name="statsList">the upload list of GeoTrailRecordsStats items.</param>
+    /// <param name="sOwnerId">owner id of GeoTrailRecordStats records.</param>
+    /// <param name="accessHandle">access handle to validate authentication.</param>
     /// <returns></returns>
     /// <remarks>
     /// The http request status code:
@@ -326,14 +330,12 @@ public class Service
         return result.sMsg;
     }
 
-
-
     /// <summary>
-    /// Uploads a list of GeoTrailRecordStats elements to the database.
+    /// Deletes a list of GeoTrailRecordStats items from the database.
     /// </summary>
-    /// <param name="sOwnerId">owner id of gpx records.</param>
-    /// <param name="sShare">Type of sharing with other owners allowed.</param>
-    /// <returns></returns>
+    /// <param name="timestampList">list of timestamps of the GeoTrailRecordStats records to delete.</param>
+    /// <param name="sOwnerId">owner id of GeoTrailRecordStats records in the database.</param>
+    /// <param name="accessHandle">access handle to validate authentication.</param>
     /// <remarks>
     /// The http request status code:
     ///     200 for ok.
@@ -365,10 +367,10 @@ public class Service
     }
 
     /// <summary>
-    /// Gets a list of Gpx records from the database. List is sorted by nTimeStamp in ascending order.
+    /// Gets a list of GeoTrailRecordStats items from the database. List is sorted by nTimeStamp in ascending order.
     /// </summary>
-    /// <param name="sOwnerId">owner id of gpx records.</param>
-    /// <param name="sShare">Type of sharing with other owners allowed.</param>
+    /// <param name="sOwnerId">owner id of GeoTrailRecordStats records.</param>
+    /// <param name="accessHandle">access handle to validate authentication.</param>
     /// <returns></returns>
     /// <remarks>
     /// The http request status code:
@@ -402,13 +404,9 @@ public class Service
         {
             WebOperationContext.Current.OutgoingResponse.StatusCode = httpStatusError;
         }
-
         return list;
     }
-
-
-
-
+    
 
     // Add more operations here and mark them with [OperationContract]
 
