@@ -364,12 +364,8 @@ public class Service
         return result.sMsg;
     }
 
-
-
-
-
     /// <summary>
-    /// Gets a list of Gpx records from the database.
+    /// Gets a list of Gpx records from the database. List is sorted by nTimeStamp in ascending order.
     /// </summary>
     /// <param name="sOwnerId">owner id of gpx records.</param>
     /// <param name="sShare">Type of sharing with other owners allowed.</param>
