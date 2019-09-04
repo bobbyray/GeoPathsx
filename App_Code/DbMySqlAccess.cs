@@ -353,7 +353,7 @@ public class DbMySqlAccess : IDbAccess
             result = new DbResult();
             if (status != MySqlTableAccess.EOpResult.SUCEEDED)
             {
-                result.SetError(DbResult.EResult.ERROR, "Database access denied.");
+                result.SetError(DbResult.EResult.ERROR, "User verification failed. Try to login again.");
             }
         }
         
