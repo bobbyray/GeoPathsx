@@ -48,9 +48,19 @@ public class DbMySqlAccess : IDbAccess
         {
             using (conn = new MySqlConnection(sDsn))
             {
-                conn.Open();
-                result = fnCallback();
-                conn.Close();
+                try {  //2020405 catch any exception
+                    conn.Open();
+                    result = fnCallback();
+                    conn.Close();
+                }
+                catch (Exception ex)
+                {
+                    result = new DbResult();
+                    result.nResult = DbResult.EResult.ERROR;
+                    result.bOk = false;
+                    result.sMsg = String.Format("DB Exception: {0}", ex.Message);
+                    conn.Close(); 
+                }
             }
             conn = null;
         }

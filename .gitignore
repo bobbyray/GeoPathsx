@@ -310,3 +310,5 @@ Private/appSettings.config
 GeoPathsx.Local.sln
 *.exclude
 TestUser/testuser.txt
+ProblemNotes/GoDadyPleskMigrationProblem.html
+ProblemNotes/VirtualDirNeedsToBeApp.txt

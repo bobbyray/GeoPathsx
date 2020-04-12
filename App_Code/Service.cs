@@ -71,7 +71,7 @@ public class Service
 
         if (!result.bOk)
         {
-            WebOperationContext.Current.OutgoingResponse.StatusCode = System.Net.HttpStatusCode.InternalServerError;
+            SetInternalErrorStatusResponse(result.sMsg);
         }
 
         return result.sMsg;
@@ -105,7 +105,7 @@ public class Service
 
         if (!result.bOk)
         {
-            WebOperationContext.Current.OutgoingResponse.StatusCode = System.Net.HttpStatusCode.InternalServerError;
+            SetInternalErrorStatusResponse(result.sMsg);
         }
 
         return result.sMsg;
@@ -156,7 +156,7 @@ public class Service
 
         if (!result.bOk)
         {
-            WebOperationContext.Current.OutgoingResponse.StatusCode = httpStatusError; 
+            SetInternalErrorStatusResponse(result.sMsg);
         }
 
         return list;
@@ -213,7 +213,7 @@ public class Service
 
         if (!result.bOk)
         {
-            WebOperationContext.Current.OutgoingResponse.StatusCode = httpStatusError;
+            SetInternalErrorStatusResponse(result.sMsg);
         }
 
         return list;
@@ -260,6 +260,7 @@ public class Service
             else
             {
                 authResult.status = (int)FbServerAuth.EAuthStatus.Error;
+                SetInternalErrorStatusResponse(dbResult.sMsg);  //20200412 added.
             }
         }
         
@@ -287,7 +288,7 @@ public class Service
 
         if (!dbResult.bOk)
         {
-            WebOperationContext.Current.OutgoingResponse.StatusCode = System.Net.HttpStatusCode.InternalServerError;
+            SetInternalErrorStatusResponse(dbResult.sMsg);
         }
 
         return dbResult.sMsg;
@@ -324,7 +325,7 @@ public class Service
 
         if (!result.bOk)
         {
-            WebOperationContext.Current.OutgoingResponse.StatusCode = System.Net.HttpStatusCode.InternalServerError;
+            SetInternalErrorStatusResponse(result.sMsg);
         }
 
         return result.sMsg;
@@ -360,7 +361,7 @@ public class Service
 
         if (!result.bOk)
         {
-            WebOperationContext.Current.OutgoingResponse.StatusCode = System.Net.HttpStatusCode.InternalServerError;
+            SetInternalErrorStatusResponse(result.sMsg);
         }
 
         return result.sMsg;
@@ -402,7 +403,7 @@ public class Service
 
         if (!result.bOk)
         {
-            WebOperationContext.Current.OutgoingResponse.StatusCode = httpStatusError;
+            SetInternalErrorStatusResponse(result.sMsg); 
         }
         return list;
     }
@@ -410,6 +411,16 @@ public class Service
 
     // Add more operations here and mark them with [OperationContract]
 
+    // Helper to set the out going response status to indicate an internal error.
+    // Arg: sDescr: status description for the internal error.
+    // Note: The status code is HttpStatusCode.InternalServerError, which is 500.
+    //       The calling function will not complete due to the outgoing status error being set.
+    private void SetInternalErrorStatusResponse(string sDescr)
+    {
+        WebOperationContext.Current.OutgoingResponse.StatusCode = System.Net.HttpStatusCode.InternalServerError;
+        WebOperationContext.Current.OutgoingResponse.StatusDescription = sDescr != null ? sDescr : "";
+
+    }
 }
 
 /// <summary>
