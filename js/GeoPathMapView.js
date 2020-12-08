@@ -122,6 +122,7 @@ function wigo_ws_GeoPathMap(bShowMapCtrls) {
         map.addLayer(layerWeather); // Works, but probably do not want to use.
         */
 
+        /* //20201207 no longer available
         var NASAGIBS_ModisTerraSnowCover = L.tileLayer('https://map1.vis.earthdata.nasa.gov/wmts-webmerc/MODIS_Terra_Snow_Cover/default/{time}/{tilematrixset}{maxZoom}/{z}/{y}/{x}.{format}', {
             attribution: 'Imagery provided by services from the Global Imagery Browse Services (GIBS), operated by the NASA/GSFC/Earth Science Data and Information System (<a href="https://earthdata.nasa.gov">ESDIS</a>) with funding provided by NASA/HQ.',
             bounds: [[-85.0511287776, -179.999999975], [85.0511287776, 179.999999975]],
@@ -134,7 +135,7 @@ function wigo_ws_GeoPathMap(bShowMapCtrls) {
         });
 
         map.addLayer(NASAGIBS_ModisTerraSnowCover);  
-
+        */
 
         /* 404 error when trying to load tiles (not found) May be find another topo layer later.
         var OpenTopoMap = L.tileLayer('http://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {

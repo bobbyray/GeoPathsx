@@ -26,10 +26,14 @@ SOFTWARE.
 There is some open source code included in the GeoPathsx Project without modification.
 Such code has its own open source license and is described below.
 ## Open Source License Used by Web Server Code at Run Time
+<-- //20201205 no longer using Facebook authentication
 * Facebook C# SDK, dll v6.0.18, Outercurve Foundation, Appache-2.0 License
+-->
 * Connector/Net, MySql.Data.dll, v6.4.3.0, Oracle and/or affiliates, Version 2 of GNU General Public License 
 ## Open Source Licenses Used by Client Side Code at Run Time
+<!-- //20201205 no longer using Facebook authentication
 * [Facebook connect for javascript](https://connect.facebook.net/en_US/sdk.js), Facebook, license given in link.
+-->
 * [jquery](http://code.jquery.com/jquery-1.10.2.js), MIT License
 * [jquery UI](http://code.jquery.com/ui/1.11.4/jquery-ui.js), MIT License
 * [Leaflet - Open Maps](https://github.com/Leaflet/Leaflet/blob/master/LICENSE), BSD 2-clause "Simplified" License

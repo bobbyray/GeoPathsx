@@ -55,8 +55,8 @@ function wigo_ws_View() {
     // Login authentication has completed.
     // Handler Signature:
     //  result: json {userName, userID, accessToken, nAuthResult}
-    //    userID: Facebook user id or empty string when authentication fails.
-    //    accessToken: access token string acquired from FaceBook, or empty string
+    //    userID: user id or empty string when authentication fails.
+    //    accessToken: access token string acquired from authentication, or empty string
     //      when athentication fails or is cancelled.
     //    nAuthResult: integer result of authentication, value of which is given 
     //      by EAuthStatus in Service.cs.
@@ -1222,7 +1222,7 @@ function wigo_ws_View() {
         ShowPathInfoDiv(bShow);
     }
 
-    // Callback after Facebook authentication has completed.
+    // Callback after authentication has completed.
     function cbFbAuthenticationCompleted(result) {
         if (that.onAuthenticationCompleted)
             that.onAuthenticationCompleted(result);
@@ -1234,13 +1234,18 @@ function wigo_ws_View() {
 
     $(window).load(map.InitializeMap)
 
-    // Set Facebook login.
-    // NOTE: appid must be in sync for private\appSettings.config
-    var fb;
-    if (bLocalDebug) 
-        fb = new wigo_ws_FaceBookAuthentication('870220976445067'); //LocalTestingAppId.
-    else
-        fb = new wigo_ws_FaceBookAuthentication('694318660701967'); //MainAppId
+    ////20201202 // Set Facebook login.
+    ////20201202 // NOTE: appid must be in sync for private\appSettings.config
+    ////20201202 var fb;
+    ////20201202 if (bLocalDebug)
+    ////20201202     fb = new wigo_ws_FaceBookAuthentication('870220976445067'); //LocalTestingAppId.
+    ////20201202 else
+    ////20201202     fb = new wigo_ws_FaceBookAuthentication('694318660701967'); //MainAppId
+
+    // Use Wigo authentication instead of Facebook. 
+    // wigo_ws_WigoAuthentication object is a replacement for the old wigo_ws_FaceBookAuthentication object, which can no longer be used.
+    // Note: Keep object name as fb to avoid changing elsewhere.
+    const fb = new wigo_ws_WigoAuthentication(divLoginHolder, wigo_ws_WigoAuthAccess.apps.geoTrail, wigo_ws_auth_api_sBaseUri);   
 
     fb.callbackAuthenticated = cbFbAuthenticationCompleted;
 }
@@ -1582,18 +1587,23 @@ function wigo_ws_Controller() {
                     // Cause geo paths to be displayed for user.
                     view.onGetPaths(view.curMode(), view.getOwnerId());
                 } else {
-                    // var sMsg = "Authentication failed:{0}status: {1}{0}UserID: {2}{0}User Name: {3}{0}AccessHandle: {4}{0}msg: {5}".format("<br/>",result.status, result.userID, result.userName, result.accessHandle, result.msg);
+                    ////20201202 // var sMsg = "Authentication failed:{0}status: {1}{0}UserID: {2}{0}User Name: {3}{0}AccessHandle: {4}{0}msg: {5}".format("<br/>",result.status, result.userID, result.userName, result.accessHandle, result.msg);
+                    ////20201202 // Note: result has info for debug.
+                    ////20201202 var sMsg = "Server-side authentication failed.<br/>" +
+                    ////20201202            "Please go to Facebook and Log Out<br/>" +
+                    ////20201202            "so that your old authentication is reset.";
+                    ////20201202 view.ShowStatus(sMsg);
                     // Note: result has info for debug.
-                    var sMsg = "Server-side authentication failed.<br/>" +
-                               "Please go to Facebook and Log Out<br/>" +
-                               "so that your old authentication is reset.";
+                    var sMsg = "Server-side authentication failed.";
+                    if (result.msg)
+                        sMsg += "<br/>" + result.msg;
                     view.ShowStatus(sMsg);
                 }
             });
         } else if (result.status === eStatus.Logout) {
             // Note: result not meaningful on logout completed because 
             //       result.userID, result.accessToken have been set to empty.
-            // Successfully logged out of OAuth provider (Facebook).
+            // Successfully logged out of OAuth provider.
             view.ShowStatus("Successfully logged out by OAuth.", false);
             var sOwnerId = model.getOwnerId();
             var bOwnerIdValid = sOwnerId.length > 0;
@@ -1702,7 +1712,9 @@ window.app.OnDocReady = function (e) {
     // Create the controller and therefore the view and model therein.
     // Redirect if not https. 
     // Attribution: Thanks to stack overflow, https://stackoverflow.com/questions/4723213/detect-http-or-https-then-force-https-in-javascript
-    var bDebugging = typeof bLocalDebug === 'boolean' && bLocalDebug;  
+    ////20201202 var bDebugging = typeof bLocalDebug === 'boolean' && bLocalDebug;  
+    const bDebugging = location.hostname === "localhost";
+
     if (!bDebugging && location.protocol !== 'https:')   
     {
      location.href = 'https:' + window.location.href.substring(window.location.protocol.length);

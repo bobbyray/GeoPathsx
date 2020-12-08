@@ -160,9 +160,9 @@ function wigo_ws_GeoPathsRESTfulApi() {
     // Authenticates user with the server.
     // Args 
     //  authData, json {accessToken, userID, userName}
-    //      accessToken: string obtained from OAuth (Facebook) server for access token.
-    //      userID: string for user ID obtained from OAuth server.
-    //      userName: string for user name obtained from OAuth server.
+    //      accessToken: string obtained from authentication server for access token.
+    //      userID: string for user ID obtained from authentication server.
+    //      userName: string for user name obtained from authentication server.
     //  onDone, callback handler for authentication completed. Signature:
     //      result: AuthResult object: {status, accessHandle, userID, userName, msg}.
     //      See function AuthResult() below for details..
@@ -199,6 +199,7 @@ function wigo_ws_GeoPathsRESTfulApi() {
             onAuthenticate = function (status) { };
         // Post ajax to geopaths server.
         var bOk = base.Post(eState.Authenticate, sAuthenticateUri(), authData);
+        return bOk; ////20201205 oops, added return.
     };
 
     // Logs out user with the server (revokes authentication).
@@ -473,11 +474,15 @@ function wigo_ws_GeoPathsRESTfulApi() {
     //         I think the problem is a configuration problem with IIS Express,
     //         and that https for the ajax requests may work properly 
     //         at the (GoDaddy) remote host. For now, not using https for these apis.
-    var base = new wigo_ws_Ajax("https://www.wigo.ws/geopathsx/Service.svc/"); // Remote host (Would like to try https)
-    var bDebugging = typeof (bLocalDebug) === 'boolean' && bLocalDebug;   
-    console.log("js/GeoPathsApi2.js bDebugging = " + bDebugging); 
-    if (bDebugging) // If local debugging, use local IIS Express server. 
-        base = new wigo_ws_Ajax("http://localhost:51765/Service.svc/");  
+    ////20201202 var base = new wigo_ws_Ajax("https://www.wigo.ws/geopathsx/Service.svc/"); //20200503 Putback www. // Remote host (Would like to try https) ////2020502Remove wwww. 
+    ////20201202 var bDebugging = typeof (bLocalDebug) === 'boolean' && bLocalDebug;
+    ////20201202 console.log("js/GeoPathsApi2.js bDebugging = " + bDebugging);
+    ////20201202 if (bDebugging) // If local debugging, use local IIS Express server.
+    ////20201202     base = new wigo_ws_Ajax("http://localhost:51765/Service.svc/");
+    // Use api base uri from js/config.js, example uri: http://localhost/WalkingMap/Service.svc/
+    var base = new wigo_ws_Ajax(wigo_ws_geopaths_api_sBaseUri);  ////20201202 added 
+
+
     // Handler in base class to handle completion of ajax request.
     base.onRequestServed = function (nState, bOk, req) {
         var sStatus = "";
