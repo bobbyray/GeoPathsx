@@ -1234,14 +1234,6 @@ function wigo_ws_View() {
 
     $(window).load(map.InitializeMap)
 
-    ////20201202 // Set Facebook login.
-    ////20201202 // NOTE: appid must be in sync for private\appSettings.config
-    ////20201202 var fb;
-    ////20201202 if (bLocalDebug)
-    ////20201202     fb = new wigo_ws_FaceBookAuthentication('870220976445067'); //LocalTestingAppId.
-    ////20201202 else
-    ////20201202     fb = new wigo_ws_FaceBookAuthentication('694318660701967'); //MainAppId
-
     // Use Wigo authentication instead of Facebook. 
     // wigo_ws_WigoAuthentication object is a replacement for the old wigo_ws_FaceBookAuthentication object, which can no longer be used.
     // Note: Keep object name as fb to avoid changing elsewhere.
@@ -1587,12 +1579,6 @@ function wigo_ws_Controller() {
                     // Cause geo paths to be displayed for user.
                     view.onGetPaths(view.curMode(), view.getOwnerId());
                 } else {
-                    ////20201202 // var sMsg = "Authentication failed:{0}status: {1}{0}UserID: {2}{0}User Name: {3}{0}AccessHandle: {4}{0}msg: {5}".format("<br/>",result.status, result.userID, result.userName, result.accessHandle, result.msg);
-                    ////20201202 // Note: result has info for debug.
-                    ////20201202 var sMsg = "Server-side authentication failed.<br/>" +
-                    ////20201202            "Please go to Facebook and Log Out<br/>" +
-                    ////20201202            "so that your old authentication is reset.";
-                    ////20201202 view.ShowStatus(sMsg);
                     // Note: result has info for debug.
                     var sMsg = "Server-side authentication failed.";
                     if (result.msg)
@@ -1712,7 +1698,6 @@ window.app.OnDocReady = function (e) {
     // Create the controller and therefore the view and model therein.
     // Redirect if not https. 
     // Attribution: Thanks to stack overflow, https://stackoverflow.com/questions/4723213/detect-http-or-https-then-force-https-in-javascript
-    ////20201202 var bDebugging = typeof bLocalDebug === 'boolean' && bLocalDebug;  
     const bDebugging = location.hostname === "localhost";
 
     if (!bDebugging && location.protocol !== 'https:')   
