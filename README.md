@@ -1,4 +1,4 @@
-<-- //20201205 Change drastically for Using Wigo authentication instead of Facebook. Comment out before changing
+<!-- //20201205 Change drastically for Using Wigo authentication instead of Facebook. Comment out before changing
 # GeoPathsx
 ## Web Server for [GeoTrail Project](https://github.com/bobbyray/geotrail)
 The web server code is written in C# and implements a Windows Communification Foundation (WCF) Service running under the Microsoft Internet Information Services (IIS). MySql is used for the database that stores data by user id for the geo paths. The user id is the Facebook user id, which a user provides by authentication via Facebook. The code is currently running in this web hosting enviroment: 
