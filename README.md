@@ -146,30 +146,6 @@ Note: GpxPaths2.js is javascript code for the GpxPaths.html page.
 
 <!-- 20201205 Change description for using Wigo authentication instead of Facebook. -->
 # GeoPathsx
-## Web Server for [GeoTrail Project](https://github.com/bobbyray/geotrail)
-The web server code is written in C# and implements a Windows Communification Foundation (WCF) Service 
-running under the Microsoft Internet Information Services (IIS). 
-MySql is used for the database that stores data by user id for the geo paths. 
-The user id is unique and is created when registering at
-[www.wigo.ws/wigoauth/wigoauth.html](https://www.wigo.ws/wigoauth/wigoauth.html).
-
-The code is currently running in this web hosting enviroment: 
-* Microsoft .Net 4
-* Microsoft IIS 7
-* MySql 5.5
-### RESTful API for Web Server Accessing Database
-A client accesses the web server via a RESTful api. 
-The GeoTrail mobile app or the GpxPaths.html page are the expected clients. 
-The https protocol is used to exhange data between a client and web server.
-
-In file js/GeoPathsApi2.js, see [properties of wigo_ws_GeoPathsRESTfulApi object](../master/js/GeoPathsApi2.js) 
-for a description of the api that a client uses.
-
-The WalkingMap repository has the implementation of the service side code for the api.
-App_Code/Service.cs contains the basic IIS handler for the api and 
-there are additional C# files for implementation of the MySql database access.
-(The server side code has been moved from this GeoPathsx repositiory to the WalkingMap repository
-because of using Wigo Authentication instead of Facebook authentication.)
 ## Web Page GpxPaths.html for Uploading Gpx Files to Web Server Database
 Rather than uploading to the web server database a path defined by using the GeoTrail mobile app, 
 one may want to upload a gpx file for a path from some other source. 
@@ -178,117 +154,48 @@ down load a gpx file for the path. Other sites may have paths (trails) that can 
 The [GpxPaths.html page](../master/GpxPaths.html) provides a means for uploading a gpx file. 
 View the [live GpxPaths page](https://www.wigo.ws/geopathsx/gpxpaths.html).
 
-Some sites may download KML files (Google format). Currently a KML file cannot be uploaded by the GeoPaths.html page. However, sites that convert a KML file to GPX for free can be found.
+Some sites may download KML files (Google format). Currently a KML file cannot be uploaded by the GpxPaths.html page. However, sites that convert a KML file to GPX for free can be found.
+
+### RESTful API for Web Server Accessing Database
+A client accesses the web server via a RESTful api. 
+The GeoTrail mobile app or the GpxPaths.html page are expected clients. 
+The https protocol is used to exhange data between a client and a remote web server.
+For debugging locally the web server is under the localhost domain and
+in this case http is used.
+
+In file js/GeoPathsApi2.js, see [properties of wigo_ws_GeoPathsRESTfulApi object](../master/js/GeoPathsApi2.js) 
+for a description of the api that a client uses.
+### Server Side Code in the WalkingMap Repository
+The WalkingMap repository has the implementation of the server side code for the api.
+App_Code/Service.cs contains the basic IIS handler for the api and 
+there are additional C# files for implementation of the MySql database access.
+(The server side code has been moved from this GeoPathsx repositiory to the WalkingMap repository
+because of using Wigo Authentication instead of Facebook authentication.)
 ## Deployment to Remote Host
 Deploy the directory structure of this repository to a remote host for which IIS is configured to have a virtual directory named geopathsx corresponding to root of this repository structure.
+
+The hosting environment or equivalent is:
+* Microsoft .Net 4<br>
+* Microsoft IIS 7<br>
+* MySql 5.5
 ## Local Debugging
-Since it likely not possible to debug at the remote server, one can debug on a local machine. Currently I am using Microsoft Visuals Studio 2013 Express for Web to debug. However, Visual Studio 2013 Express for Web is no longer available and is replaced by Visual Studio Community Edition.
-### Local Debugging, Preliminaries To Do Once
-* Install Microsoft Visual Studio Community Edition if Needed  
-If not using Visual Studio 2013 Express for Web, you can install the [Microsoft Visual Studio Community Edition](https://www.visualstudio.com/vs/community/), which is the replacement for Visual Studio Express 203 for Web.
-Since the following description was written for using Visual Studio 2013 Express for Web, it could be outdated for later versions.  
-The Visual Studio sets up an IIS Express automatically.
-Locally download and extract this respository. Using Visual Studio, open the geopathsx folder as a website.
-You should be ready to go, except you may need to install MySql database locally described next.
-* Install MySql WorkBench Comnunity Edition if Needed  
-See [Instructions for installing MySql WorkBench](http://dev.mysql.com/doc/refman/5.7/en/windows-installation.html). The following description pertains to using the the MySql Installer Method, selecting mysql-installer-web-community-5.7.11.0.msi for the installer.  
-Notes for installing, which obviously may be outdated for a different installer version, follow:
-  <pre>
-  I did not sign up for an Oracle account, I just downloaded.
-  
-  Installer file downloaded to downloads folder.
-  
-  Right-click on file | Install to start (MySql Installer 1.4).
-  
-  I clicked Yes to install available upgrade.
-    Requirements check indicated requirements not met for:
-    MySql for Excel 1.3f.6
-    MySql for Visual Studio 1.2.6
-    Connector for Python (3.4) 2.1.3
-    I proceeded without updating for these.
-  
-  Ready to download:
-    MySql Server 5.7.11
-    MySql Workbench 6.3.6
-    MySql Notifier 1.1.6
-    MySql Fabric 1.5.6 &amp; utilities
-    Connector ODBC 5.3.4
-    Connector/C++ 1.1.7
-    Connector/J 5.1.38
-    Connector/NET 6.9.8
-    MySql Documentation 5.7.11
-    Samples &amp; Examples 5.7.11
-    All downloaded and installed automatically (after clicking Execute).
-    The status is shown during the process.
-  
-  Next installer goes through configuration of MySql Server.
-    Config Type: Development Machine
-    Mark TCP/IP
-    Port Number: 3306 (default)
-    Clear Open Firewall port for network access check box
-    Pipe Name: MYSQL
-    Memory Name: MYSQL
-    Other check boxes are unmarked.
-  
-  Next installer goes through Accounts and Roles
-    Root Account Password: *******
-      NOTE: password must match that used in the database connection string 
-            in the web.config on the IIS server.
-    MySql User Accounts: did not add any.
-  
-  Next installer goes through Window Services
-    Mark MySql Server as a Windows Service
-    Mark Start the MySql Server at System Startup
-    Mark Standard Account type.
-    The above are the defaults.
-  
-  Next Apply Server Configuration
-    Click Execute.
-    Status shows progress of configuring.
-    Click Finish when done.
-    Next Check that Connect to Service
-    User: root
-    Password: *******
-      NOTE: Use root password set above.
-    (The above are set by default.)
-    Click Check.  Connection successful.
-  
-  Next installer shows Apply Server Configuration (again)
-    Looks like just checking configuration.
-    Click Execute
-    Successfully runs through Steps.
-    Click Finish
-  
-  Next installer shows Product Configuration
-    MySql Server 5.7.11 – complete.
-    Samples &amp; Examples 5.7.11 – complete.
-    Seems to be completed immediately, probably already done.
-    Click Next
-  
-  Next installer shows Installation Complete
-    Installation procedure completed.
-    Mark Start MySql Workbench after Setup
-    Click Copy Log to Clipboard
-    Click Finish
-  
-  Installer ends and Workbench opens.
-  </pre>  
-* Initialize MySql Database  
-In MySql Workbench prepare the database schema:</p>
-  * **NOTE: Do not import database if it already exists because it will be over-written with empty tables.**  
-  * If database does not exist, import it from [MySqlInitialTables/MySqlInitialTable.sql](../master/MySqlInitialTables/MySqlInitialTable.sql).  
-  Customize the MySqlInitialTable.sql file to use the database name you want instead of some_geopath.  
-  Change the name in two places: the CREATE DATABASE and USE statements.  
-  Note: Do **not** change the table name of geopath in the file.
-  * The database name and password must be set in the local web.config file to match.  
+Since it is likely not possible to debug at the remote server, one can debug on a local machine. Currently I am using Microsoft Visuals Studio 2013 Express for Web to debug. However, Visual Studio 2013 Express for Web is no longer available and is replaced by Visual Studio Community Edition.
+
+In the [WalkingMap Repository](https://github.com/bobbyray/WalkingMap), the **Local Debugging** section describes
+preparing Visual Studio, MySql, and Internet Information Services (IIS) on a Windows desktop machine. 
+
+Note that Visual Studio must be started with Run As Administrator in order to debug using the localhost IIS.
+
+Install this GeoPathsx project in Visual Studio from its Github repository
+
+Install the WalkingMap project in Visual Studio from its Github repository.
+
+Install the WigoAuth1 project in Visual Studio from its Github repository.
 ### Local Debugging, js/config.js
 The file defines the URIs for the wigo auth api, wigo auth page, and geopathsx api.
 The URIs are diffent between the GoDaddy (remote host) and local debugging. 
 Comments indicate which to use for local debugging or for GoDaddy.
 For local debugging, the URIs for local debugging are valid and
 the URIs for GoDaddy are commented out; vice versa at GoDaddy.
-
-The projects shown in the WigoAuth1 and walkingMap repositories must also be installed locally.
-
 
 
