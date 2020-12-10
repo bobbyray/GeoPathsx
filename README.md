@@ -184,7 +184,7 @@ Since it is likely not possible to debug at the remote server, one can debug on 
 In the [WalkingMap Repository](https://github.com/bobbyray/WalkingMap), the **Local Debugging** section describes
 preparing Visual Studio, MySql, and Internet Information Services (IIS) on a Windows desktop machine. 
 
-Note that Visual Studio must be started with Run As Administrator in order to debug using the localhost IIS.
+**Note that Visual Studio must be started with Run As Administrator in order to debug using the localhost IIS.**
 
 Install this GeoPathsx project in Visual Studio from its Github repository
 
@@ -197,5 +197,7 @@ The URIs are diffent between the GoDaddy (remote host) and local debugging.
 Comments indicate which to use for local debugging or for GoDaddy.
 For local debugging, the URIs for local debugging are valid and
 the URIs for GoDaddy are commented out; vice versa at GoDaddy.
+### Why LocalHost IIS for Debugging instead of IISExpress?
+The localhost IIS is needed for local debugging in order to use wigo authentication (see WigoAuth1 repository) locally. The WigoAuth1 virtual directory must be in the same domain as the GeoPathsx virtual directory to avoid Cross Origin Request Scripting (CORS) errors in IIS. If debugging uses the IISExpress from within Visual Studio, each project is started in a different localhost:pppp IIS, where the port number (pppp) is different for each project resulting in CORS errors when authenticating.
 
-
+**Note that Visual Studio must be started with Run As Administrator in order to debug using the localhost IIS.**
